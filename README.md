@@ -40,7 +40,8 @@ If you discover any security related issues, please email leo@leolutz.com instea
 
 ## Credits
 
--   [Leo Lutz](https://github.com/lsv-eu)
+-   [Leo Lutz](https://github.com/skeemer)
+-   [Paul Riddick](https://github.com/paulriddickeu)
 -   [All Contributors](../../contributors)
 
 ## License
