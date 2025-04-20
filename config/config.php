@@ -12,7 +12,7 @@ return [
      * List of classes that are observed.
      */
     'observers' => [
-        //\App\Models\User::class => [
+        // \App\Models\User::class => [
         //
         //    /**
         //     * The display name of the model
@@ -50,6 +50,6 @@ return [
         //            'type' => 'empty|date|datetime'
         //        ],
         //    ],
-        //],
+        // ],
     ],
 ];
