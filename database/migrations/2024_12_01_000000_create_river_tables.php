@@ -33,7 +33,7 @@ class CreateRiverTables extends Migration
             $table->uuid('job_id')->nullable();
             $table->string('location')->nullable();
             $table->longText('listeners');
-            $table->longText('details');
+            $table->longText('raft');
             $table->timestamps();
         });
 

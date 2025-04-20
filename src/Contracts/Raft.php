@@ -19,17 +19,19 @@ abstract class Raft
         throw new \Exception('Property does not exist. '.get_class($this)." does not have property, $name.");
     }
 
-    final public function deyhdrate(): array
+    final public function deyhdrate(): string
     {
-        return [
+        return json_encode([
             get_class($this),
             $this->toArray(),
-        ];
+        ]);
     }
 
-    public static function hydrate(array $data): self
+    public static function hydrate(string $data): self
     {
-        return new static($data);
+        $parts = json_decode($data, true);
+
+        return new $parts[0]($parts[1]);
     }
 
     abstract public function toArray(): array;

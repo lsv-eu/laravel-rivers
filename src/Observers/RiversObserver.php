@@ -29,7 +29,9 @@ class RiversObserver
 
     protected function handle(CreatesRaft $model, string $event): void
     {
-        $class = get_class($model);
-        Rivers::trigger("model.$event.$class.{$model->getKey()}", true, $model->createRaft());
+        if ($raft = $model->createRaft()) {
+            $class = get_class($model);
+            Rivers::trigger("model.$event.$class.{$model->getKey()}", $raft, true);
+        }
     }
 }
