@@ -16,39 +16,57 @@
         }
     ],
     "require": {
-        "php": "^7.4|^8.0",
-        "illuminate/support": "^8.0"
+        "php": "^8.2",
+        "illuminate/support": "^11.0"
     },
     "require-dev": {
-        "orchestra/testbench": "^6.0",
-        "phpunit/phpunit": "^9.0"
+        "laravel/pint": "^1.18",
+        "orchestra/testbench": "^9.5",
+        "pestphp/pest": "^3.5"
     },
     "autoload": {
+        "files": [
+            "src/Helpers.php"
+        ],
         "psr-4": {
             "LsvEu\\Rivers\\": "src"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "LsvEu\\Rivers\\Tests\\": "tests"
+            "Tests\\": "tests",
+            "Workbench\\App\\": "workbench/app/",
+            "Workbench\\Database\\Factories\\": "workbench/database/factories/",
+            "Workbench\\Database\\Seeders\\": "workbench/database/seeders/"
         }
     },
     "scripts": {
-        "test": "vendor/bin/phpunit",
-        "test-coverage": "vendor/bin/phpunit --coverage-html coverage"
-
+        "test": "vendor/bin/pest",
+        "test-coverage": "vendor/bin/pest --coverage-html coverage",
+        "post-autoload-dump": [
+            "@clear",
+            "@prepare"
+        ],
+        "clear": "@php vendor/bin/testbench package:purge-skeleton --ansi",
+        "prepare": "@php vendor/bin/testbench package:discover --ansi",
+        "build": "@php vendor/bin/testbench workbench:build --ansi",
+        "serve": [
+            "Composer\\Config::disableProcessTimeout",
+            "@build",
+            "@php vendor/bin/testbench serve --ansi"
+        ]
     },
     "config": {
-        "sort-packages": true
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
     },
     "extra": {
         "laravel": {
             "providers": [
                 "LsvEu\\Rivers\\RiversServiceProvider"
-            ],
-            "aliases": {
-                "Rivers": "LsvEu\\Rivers\\RiversFacade"
-            }
+            ]
         }
     }
 }
