@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Workbench\App\Models\User;
 
 class CreateArticlesTable extends Migration
 {
@@ -10,9 +11,10 @@ class CreateArticlesTable extends Migration
     {
         Schema::create('articles', function (Blueprint $table) {
             $table->id();
+            $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
             $table->string('title');
             $table->text('body');
-            $table->foreignIdFor(\Workbench\App\Models\User::class);
+            $table->timestamp('published_at')->nullable();
             $table->timestamps();
         });
     }
