@@ -15,7 +15,7 @@ class Rivers
         $this->loadObservers();
     }
 
-    public function trigger(string $event, bool $hasId = false, array $details = null): void
+    public function trigger(string $event, bool $hasId = false, ?array $details = null): void
     {
         if ($hasId) {
             RiverRun::query()

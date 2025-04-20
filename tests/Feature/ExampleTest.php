@@ -13,7 +13,7 @@ test('example', function () {
 });
 
 test('create_users', function () {
-    //$user = \Orchestra\Testbench\Factories\UserFactory::new()->createOne(['name' => 'John']);
+    // $user = \Orchestra\Testbench\Factories\UserFactory::new()->createOne(['name' => 'John']);
     $user = \Workbench\App\Models\User::factory()->createOne(['name' => 'John']);
 
     expect($user->name)->toBe('John');
@@ -37,7 +37,7 @@ test('create_first_river', function () {
     $tag = Tag::create(['name' => 'Test',  'type' => 'user']);
     $user = \Workbench\App\Models\User::factory()->createOne(['name' => 'John']);
     $user->tags()->attach($tag);
-    dd($river->riverRuns);
+    expect($river->riverRuns)->toHaveCount(1);
 });
 
 test('mock app tag events', function () {});
