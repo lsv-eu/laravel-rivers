@@ -9,7 +9,9 @@ use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use LsvEu\Rivers\Contracts\CreatesRaft;
+use LsvEu\Rivers\Contracts\Raft;
 use LsvEu\Rivers\Observers\RiversObserver;
+use Workbench\App\Rivers\Rafts\UserRaft;
 use Workbench\Database\Factories\UserFactory;
 
 #[ObservedBy(RiversObserver::class)]
@@ -53,12 +55,9 @@ class User extends Authenticatable implements CreatesRaft
         return $this->morphToMany(Tag::class, 'taggable')->using(Taggable::class)->whereType('user');
     }
 
-    public function createRaft(): array
+    public function createRaft(): Raft
     {
-        return [
-            'modelClass' => get_class($this),
-            'modelId' => $this->getKey(),
-        ];
+        return new UserRaft(['modelId' => $this->getKey()]);
     }
 
     protected static function newFactory(): UserFactory

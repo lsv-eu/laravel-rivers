@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use LsvEu\Rivers\Cartography\RiverMap;
+use LsvEu\Rivers\Contracts\Raft;
 
 /**
  * @property RiverMap $map
@@ -63,10 +64,10 @@ class River extends Model
         $query->whereJsonContains('listeners', $event);
     }
 
-    public function startRun(string $event, array $details)
+    public function startRun(string $event, Raft $raft)
     {
         $this->riverRuns()->create([
-            'details' => $details,
+            'raft' => $raft,
         ]);
     }
 }

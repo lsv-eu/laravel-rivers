@@ -3,10 +3,12 @@
 namespace LsvEu\Rivers\Models;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use LsvEu\Rivers\Contracts\Raft;
 
 class RiverRun extends Model
 {
@@ -19,14 +21,13 @@ class RiverRun extends Model
         parent::boot();
 
         static::saving(function (RiverRun $run) {
-            $run->listeners = array_values($run->river->map->getInterruptListeners($run->details));
+            $run->listeners = array_values($run->river->map->getInterruptListeners($run->raft));
         });
     }
 
     protected function casts(): array
     {
         return [
-            'details' => 'json',
             'listeners' => 'json',
         ];
     }
@@ -49,5 +50,13 @@ class RiverRun extends Model
     public function scopeHasListener(Builder $query, string $event): void
     {
         $query->whereJsonContains('listeners', $event);
+    }
+
+    protected function raft(): Attribute
+    {
+        return Attribute::make(
+            get: fn (): Raft => Raft::hydrate($this->attributes['raft']),
+            set: fn (Raft $raft) => ['raft' => $raft->deyhdrate()],
+        );
     }
 }

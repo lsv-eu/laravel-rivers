@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphPivot;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use LsvEu\Rivers\Contracts\CreatesRaft;
+use LsvEu\Rivers\Contracts\Raft;
 use LsvEu\Rivers\Observers\RiversObserver;
 
 #[ObservedBy(RiversObserver::class)]
@@ -22,11 +23,12 @@ class Taggable extends MorphPivot implements CreatesRaft
         return $this->morphTo();
     }
 
-    public function createRaft(): array
+    public function createRaft(): ?Raft
     {
-        return [
-            'modelClass' => $this->taggable_type,
-            'modelId' => $this->taggable_id,
-        ];
+        if ($this->taggable && is_subclass_of($this->taggable, CreatesRaft::class)) {
+            return $this->taggable->createRaft();
+        }
+
+        return null;
     }
 }

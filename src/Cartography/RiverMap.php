@@ -4,6 +4,7 @@ namespace LsvEu\Rivers\Cartography;
 
 use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
 use Illuminate\Contracts\Support\Arrayable;
+use LsvEu\Rivers\Contracts\Raft;
 
 class RiverMap implements \JsonSerializable, Arrayable, CastsAttributes
 {
@@ -29,7 +30,7 @@ class RiverMap implements \JsonSerializable, Arrayable, CastsAttributes
         $this->repeatable = false;
     }
 
-    public function getInterruptListeners(array $raft): array
+    public function getInterruptListeners(Raft $raft): array
     {
         return $this->sources->map(fn (Source $source) => $source->getInterruptListener($raft))->filter()->all();
     }

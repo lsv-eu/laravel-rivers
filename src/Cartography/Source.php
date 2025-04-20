@@ -2,6 +2,8 @@
 
 namespace LsvEu\Rivers\Cartography;
 
+use LsvEu\Rivers\Contracts\Raft;
+
 abstract class Source extends RiverElement
 {
     public string $id;
@@ -24,7 +26,7 @@ abstract class Source extends RiverElement
         return [];
     }
 
-    public function getInterruptListener(array $raft): ?string
+    public function getInterruptListener(Raft $raft): ?string
     {
         return null;
     }
