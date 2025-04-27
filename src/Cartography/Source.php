@@ -2,11 +2,14 @@
 
 namespace LsvEu\Rivers\Cartography;
 
+use LsvEu\Rivers\Cartography\Source\Conditions\Condition;
 use LsvEu\Rivers\Contracts\Raft;
 
 abstract class Source extends RiverElement
 {
     public string $id;
+
+    public RiverElementCollection $conditions;
 
     public bool $enabled;
 
@@ -15,6 +18,8 @@ abstract class Source extends RiverElement
     public function __construct(array $attributes = [])
     {
         parent::__construct($attributes);
+
+        $this->conditions = RiverElementCollection::make($attributes['conditions'] ?? []);
 
         $this->enabled = $attributes['enabled'] ?? false;
 
@@ -36,10 +41,19 @@ abstract class Source extends RiverElement
         return null;
     }
 
+    public function check(mixed $model): bool
+    {
+        return $this->conditions->reduce(
+            callback: fn (bool $carry, Condition $condition) => $carry && $condition->check($model),
+            initial: true,
+        );
+    }
+
     public function toArray(): array
     {
         return [
             'id' => $this->id,
+            'conditions' => $this->conditions->toArray(),
             'enabled' => $this->enabled,
             'restartable' => $this->restartable,
         ];

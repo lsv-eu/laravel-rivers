@@ -5,7 +5,7 @@ namespace LsvEu\Rivers\Cartography;
 use Illuminate\Contracts\Support\Arrayable;
 use Symfony\Component\Uid\Ulid;
 
-class RiverElement implements Arrayable
+abstract class RiverElement implements Arrayable
 {
     public string $id;
 
