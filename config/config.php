@@ -8,6 +8,10 @@ return [
         'prefix' => 'river_',
     ],
 
+    'queue' => env('RIVERS_QUEUE', 'default'),
+
+    'job_class' => \LsvEu\Rivers\Jobs\ProcessRiverRun::class,
+
     /*
      * List of classes that are observed.
      */

@@ -10,6 +10,8 @@ class RiverInterrupt extends Model
 {
     use HasUlids;
 
+    protected $guarded = [];
+
     protected function casts(): array
     {
         return [

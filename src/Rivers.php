@@ -2,7 +2,7 @@
 
 namespace LsvEu\Rivers;
 
-use LsvEu\Rivers\Contracts\Raft;
+use LsvEu\Rivers\Contracts\CreatesRaft;
 use LsvEu\Rivers\Models\HasObservers;
 use LsvEu\Rivers\Models\River;
 use LsvEu\Rivers\Models\RiverRun;
@@ -16,16 +16,16 @@ class Rivers
         $this->loadObservers();
     }
 
-    public function trigger(string $event, Raft $details, bool $eventHasId = false): void
+    public function trigger(string $event, CreatesRaft $model, bool $eventHasId = false): void
     {
         if ($eventHasId) {
             RiverRun::query()
                 ->hasListener($event)
-                ->chunk(100, function ($runs) use ($details, $event) {
+                ->chunk(100, function ($runs) use ($model, $event) {
                     foreach ($runs as $run) {
                         $run->riverInterrupts()->create([
                             'event' => $event,
-                            'details' => $details,
+                            'details' => $model->createRaft(),
                         ]);
                     }
                 });
@@ -35,8 +35,9 @@ class Rivers
         River::query()
             ->hasListener($startEvent)
             ->active()
-            ->chunk(100, function ($rivers) use ($details, $event, $eventHasId) {
+            ->chunk(100, function ($rivers) use ($model, $startEvent, $eventHasId) {
                 foreach ($rivers as $river) {
+                    // TDOD: Check if this needs re-thought because of source conditions
                     if ($eventHasId) {
                         $latestRun = $river->riverRuns()->latest()->first();
                         // Don't start a new run if:
@@ -46,7 +47,10 @@ class Rivers
                             continue;
                         }
                     }
-                    $river->startRun($event, $details);
+                    $source = $river->map->getSourceByStartListener($startEvent);
+                    if ($source->check($model)) {
+                        $river->startRun($startEvent, $model, $source);
+                    }
                 }
             });
     }

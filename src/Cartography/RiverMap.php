@@ -40,6 +40,13 @@ class RiverMap implements \JsonSerializable, Arrayable, CastsAttributes
         return $this->sources->map(fn (Source $source) => $source->getStartListener())->filter()->all();
     }
 
+    public function getSourceByStartListener(string $event): Source
+    {
+        return $this->sources
+            ->mapWithKeys(fn (Source $source) => [$source->getStartListener() => $source])
+            ->get($event);
+    }
+
     public function toArray(): array
     {
         return [

@@ -3,6 +3,9 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use LsvEu\Rivers\Models\River;
+use LsvEu\Rivers\Models\RiverRun;
+use LsvEu\Rivers\Models\RiverVersion;
 
 class CreateRiverTables extends Migration
 {
@@ -12,7 +15,7 @@ class CreateRiverTables extends Migration
             $table->ulid('id')->primary();
             $table->string('title');
             $table->string('status')->default('draft');
-            $table->foreignIdFor(\LsvEu\Rivers\Models\RiverVersion::class, 'current_version_id')->nullable();
+            $table->foreignIdFor(RiverVersion::class, 'current_version_id')->nullable();
             $table->longText('map');
             $table->longText('listeners');
             $table->timestamps();
@@ -21,7 +24,7 @@ class CreateRiverTables extends Migration
 
         Schema::create('river_versions', function (Blueprint $table) {
             $table->ulid('id')->primary();
-            $table->foreignIdFor(\LsvEu\Rivers\Models\River::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(River::class)->constrained()->cascadeOnDelete();
             $table->boolean('is_autosave')->default(false);
             $table->longText('map');
             $table->timestamps();
@@ -29,18 +32,20 @@ class CreateRiverTables extends Migration
 
         Schema::create('river_runs', function (Blueprint $table) {
             $table->ulid('id')->primary();
-            $table->foreignIdFor(\LsvEu\Rivers\Models\River::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(River::class)->constrained()->cascadeOnDelete();
             $table->uuid('job_id')->nullable();
             $table->string('location')->nullable();
             $table->longText('listeners');
             $table->longText('raft');
             $table->timestamps();
+            $table->timestamp('completed_at')->nullable();
         });
 
         Schema::create('river_interrupts', function (Blueprint $table) {
             $table->ulid('id')->primary();
-            $table->foreignIdFor(\LsvEu\Rivers\Models\RiverRun::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(RiverRun::class)->constrained()->cascadeOnDelete();
             $table->string('event');
+            $table->boolean('checked')->default(false);
             $table->longText('details');
             $table->timestamps();
         });

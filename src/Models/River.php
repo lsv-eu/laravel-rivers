@@ -7,7 +7,10 @@ use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Config;
 use LsvEu\Rivers\Cartography\RiverMap;
+use LsvEu\Rivers\Cartography\Source;
+use LsvEu\Rivers\Contracts\CreatesRaft;
 use LsvEu\Rivers\Contracts\Raft;
 
 /**
@@ -64,10 +67,26 @@ class River extends Model
         $query->whereJsonContains('listeners', $event);
     }
 
-    public function startRun(string $event, Raft $raft)
+    public function isPaused(): bool
     {
-        $this->riverRuns()->create([
-            'raft' => $raft,
-        ]);
+        return $this->status !== 'active';
+    }
+
+    public function startRun(string $event, CreatesRaft|Raft $raft, Source $source): void
+    {
+        if (! $this->isPaused()) {
+            $run = $this->riverRuns()->create([
+                'raft' => $raft instanceof Raft ? $raft : $raft->createRaft(),
+                'location' => $source->id,
+            ]);
+
+            $run->interrupts()->create([
+                'event' => $event,
+                'checked' => true,
+                'details' => $raft->toArray(),
+            ]);
+
+            Config::get('rivers.job_class')::dispatch($run->id);
+        }
     }
 }
