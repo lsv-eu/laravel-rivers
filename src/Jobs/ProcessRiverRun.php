@@ -7,6 +7,7 @@ use Illuminate\Database\RecordNotFoundException;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Config;
+use LsvEu\Rivers\Cartography\Fork;
 use LsvEu\Rivers\Models\RiverRun;
 
 class ProcessRiverRun implements ShouldQueue
@@ -58,6 +59,9 @@ class ProcessRiverRun implements ShouldQueue
         }
 
         if ($run->completed_at) {
+            $this->delete();
+            $run->update(['running' => false, 'location' => null]);
+
             return;
         }
 
@@ -67,18 +71,52 @@ class ProcessRiverRun implements ShouldQueue
         }
 
         if ($run->river->isPaused()) {
+            $this->delete();
+            $run->update(['running' => 'false']);
+
             return;
         }
 
-        // TODO: Handle run step
+        $connection = $run->river->map->connections->firstWhere('startId', $run->location);
 
-        // Recheck in case interrupt was created while processing this current step
-        $this->handleInterrupt($run);
+        if (! $connection) {
+            $this->completeJob($run);
+            $this->delete();
 
-        if (! $run->completed_at) {
             return;
+        }
+
+        $next = $run->river->map->forks->get($connection->endId) ?? $run->river->map->rapids->get($connection->endId);
+        if ($next instanceof Fork) {
+            $nextConnectionConditionId = $next->getNext($run->raft);
+            $nextConnection = $run->river->map->connections
+                ->where('startId', $next->id)
+                ->where('startConditionId', $next->id != $nextConnectionConditionId ? $nextConnectionConditionId : null)
+                ->first();
+
+            if (! $nextConnection) {
+                $this->completeJob($run);
+                $this->delete();
+
+                return;
+            }
+
+            $next = $run->river->map->rapids->get($nextConnection->endId);
+        }
+
+        $next->process($run->raft);
+
+        $run->location = $next->id;
+        $run->save();
+
+        $run->river->refresh();
+        if ($this->handleInterrupt($run)) {
+            return;
+        } elseif (! $run->river->isPaused()) {
+            static::dispatch($run);
+            $run->update(['running' => true]);
         } else {
-            // TODO: Set location to the current step and dispatch
+            $run->update(['running' => false]);
         }
     }
 
@@ -93,17 +131,25 @@ class ProcessRiverRun implements ShouldQueue
         if ($interrupts->isNotEmpty()) {
             foreach ($interrupts as $interrupt) {
                 // If completed and interrupt is a source, start a new run (repeatable already checked) and break
-                if (false) {
+                if ($interrupt) {
                     // TODO: Start new run
                     $run->interrupts()->whereChecked(false)->latest()->update(['checked' => false]);
 
                     return true;
                 }
-                // Elseif not completed, set location and break
+                // Elseif not completed, set the location and break
             }
 
         }
 
         return false;
+    }
+
+    protected function completeJob(RiverRun $run): void
+    {
+        $run->completed_at = now();
+        $run->location = null;
+        $run->running = false;
+        $run->save();
     }
 }

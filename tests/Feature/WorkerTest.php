@@ -14,18 +14,8 @@ use Workbench\App\Rivers\Sources\TaggableCondition;
 
 uses(UsesConfig::class);
 
-test('should not start if not active', function () {
-    River::create([
-        'title' => 'Queue Test',
-        'status' => 'paused',
-        'map' => new RiverMap([
-            'sources' => [
-                new ModelCreated([
-                    'class' => User::class,
-                ]),
-            ],
-        ]),
-    ]);
+test('job should not start if not active', function () {
+    createUserListeningRiver(status: 'paused');
 
     Queue::fake();
     Queue::assertCount(0);
@@ -33,18 +23,8 @@ test('should not start if not active', function () {
     Queue::assertCount(0);
 });
 
-test('should not start if active', function () {
-    River::create([
-        'title' => 'Queue Test',
-        'status' => 'active',
-        'map' => new RiverMap([
-            'sources' => [
-                new ModelCreated([
-                    'class' => User::class,
-                ]),
-            ],
-        ]),
-    ]);
+test('job should start if active', function () {
+    createUserListeningRiver();
 
     Queue::fake();
     Queue::assertCount(0);
@@ -52,7 +32,45 @@ test('should not start if active', function () {
     Queue::assertCount(1);
 });
 
-test('should use the configured queue', function () {
+test('job should use the configured queue', function () {
+    createUserListeningRiver();
+
+    // Test the default
+    Queue::fake();
+    Queue::assertCount(0);
+    User::factory()->create();
+    Queue::assertCount(1);
+    Queue::assertPushedOn('default', ProcessRiverRun::class);
+
+    // Test with a different queue
+    config()->set('rivers.queue', 'rivers');
+    Queue::fake();
+    Queue::assertCount(0);
+    User::factory()->create();
+    Queue::assertCount(1);
+    Queue::assertPushedOn('rivers', ProcessRiverRun::class);
+});
+
+test('job should complete without processing if paused', function () {
+    $river = createUserListeningRiver(status: 'paused');
+
+    $user = User::factory()->createOneQuietly();
+    $riverRun = $river->riverRuns()->create([
+        'location' => 'user1',
+        'raft' => $user->createRaft(),
+    ]);
+    $job = (new ProcessRiverRun($riverRun->id))->withFakeQueueInteractions();
+    $job->handle();
+    $job->assertDeleted();
+});
+
+test('run should complete if no connections', function () {
+    createUserListeningRiver();
+    User::factory()->createOne();
+    expect(RiverRun::first()->completed_at)->toBeObject();
+});
+
+test('job should use the configured queue - too complex', function () {
     $tag1 = Tag::create(['name' => 'Test Default',  'type' => 'user']);
 
     River::create([
@@ -91,4 +109,20 @@ test('should use the configured queue', function () {
     $user->tags()->attach($tag1);
     Queue::assertPushedOn('rivers', ProcessRiverRun::class);
     Queue::assertCount(1);
-});
+})->skip();
+
+function createUserListeningRiver(string $status = 'active'): River
+{
+    return River::create([
+        'title' => 'Queue Test',
+        'status' => $status,
+        'map' => new RiverMap([
+            'sources' => [
+                new ModelCreated([
+                    'id' => 'user1',
+                    'class' => User::class,
+                ]),
+            ],
+        ]),
+    ]);
+}

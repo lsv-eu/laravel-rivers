@@ -23,8 +23,7 @@ class TaggableCondition extends Condition
 
     public function toArray(): array
     {
-        return [
-            ...parent::toArray(),
+        return parent::toArray() + [
             'tagId' => $this->tagId,
         ];
     }

@@ -20,4 +20,11 @@ abstract class RiverElement implements Arrayable
             'id' => $this->id,
         ];
     }
+
+    public function validate(RiverMap $map): ?array
+    {
+        return [
+            'Bad Object',
+        ];
+    }
 }

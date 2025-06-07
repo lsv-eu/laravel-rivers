@@ -33,7 +33,7 @@ class CreateRiverTables extends Migration
         Schema::create('river_runs', function (Blueprint $table) {
             $table->ulid('id')->primary();
             $table->foreignIdFor(River::class)->constrained()->cascadeOnDelete();
-            $table->uuid('job_id')->nullable();
+            $table->boolean('running')->default(false);
             $table->string('location')->nullable();
             $table->longText('listeners');
             $table->longText('raft');

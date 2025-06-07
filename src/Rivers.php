@@ -31,13 +31,13 @@ class Rivers
                 });
         }
 
-        $startEvent = $eventHasId ? str($event)->explode('.')->slice(0, -1)->implode('.') : $event;
+        $startEvent = $event;
         River::query()
             ->hasListener($startEvent)
             ->active()
             ->chunk(100, function ($rivers) use ($model, $startEvent, $eventHasId) {
                 foreach ($rivers as $river) {
-                    // TDOD: Check if this needs re-thought because of source conditions
+                    // TODO: Check if this needs re-thought because of source conditions
                     if ($eventHasId) {
                         $latestRun = $river->riverRuns()->latest()->first();
                         // Don't start a new run if:

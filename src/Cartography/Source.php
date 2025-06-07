@@ -9,6 +9,9 @@ abstract class Source extends RiverElement
 {
     public string $id;
 
+    /**
+     * @var RiverElementCollection<string, Condition>
+     */
     public RiverElementCollection $conditions;
 
     public bool $enabled;

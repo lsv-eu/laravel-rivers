@@ -5,12 +5,20 @@ namespace LsvEu\Rivers\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use LsvEu\Rivers\Cartography\RiverMap;
 
 class RiverVersion extends Model
 {
     use HasUlids;
 
     protected $guarded = [];
+
+    protected function casts(): array
+    {
+        return [
+            'map' => RiverMap::class,
+        ];
+    }
 
     public function river(): BelongsTo
     {

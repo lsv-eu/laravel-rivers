@@ -3,6 +3,7 @@
 namespace LsvEu\Rivers\Models;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -12,6 +13,7 @@ use LsvEu\Rivers\Cartography\RiverMap;
 use LsvEu\Rivers\Cartography\Source;
 use LsvEu\Rivers\Contracts\CreatesRaft;
 use LsvEu\Rivers\Contracts\Raft;
+use LsvEu\Rivers\Exceptions\InvalidRiverMapException;
 
 /**
  * @property RiverMap $map
@@ -35,7 +37,7 @@ class River extends Model
         });
 
         static::saving(function (River $river) {
-            $river->listeners = array_values($river->map->getStartListeners());
+            $river->listeners = $river->status == 'active' ? array_values($river->map->getStartListeners()) : [];
         });
     }
 
@@ -88,5 +90,16 @@ class River extends Model
 
             Config::get('rivers.job_class')::dispatch($run->id);
         }
+    }
+
+    protected function map(): Attribute
+    {
+        return Attribute::set(function (RiverMap $map) {
+            if (! $map->isValid()) {
+                throw new InvalidRiverMapException;
+            }
+
+            return $map->set($this, 'map', $map, []);
+        });
     }
 }

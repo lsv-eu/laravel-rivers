@@ -9,27 +9,26 @@ class RiversObserver
 {
     public function created(CreatesRaft $model): void
     {
-        $this->handle($model, 'created');
+        $this->handle($model, 'created', false);
     }
 
     public function deleted(CreatesRaft $model): void
     {
-        $this->handle($model, 'deleted');
-    }
-
-    public function saved(CreatesRaft $model): void
-    {
-        $this->handle($model, 'saved');
+        $this->handle($model, 'deleted', true);
     }
 
     public function updated(CreatesRaft $model): void
     {
-        $this->handle($model, 'updated');
+        $this->handle($model, 'updated', true);
     }
 
-    protected function handle(CreatesRaft $model, string $event): void
+    protected function handle(CreatesRaft $model, string $event, bool $eventHasId): void
     {
-        $class = get_class($model);
-        Rivers::trigger("model.$event.$class.{$model->getKey()}", $model, true);
+        $listener = "model.$event.".get_class($model);
+        if ($eventHasId) {
+            $listener .= ".{$model->getKey()}";
+        }
+
+        Rivers::trigger($listener, $model, $eventHasId);
     }
 }

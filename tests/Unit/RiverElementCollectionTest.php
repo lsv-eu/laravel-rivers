@@ -32,7 +32,7 @@ test('unserialization fails for classes not extending RiverElement', function ()
         [\Tests\Unit\Classes\BadRiverElement::class, ['id' => 'foo']],
     ]))->toThrow(
         \Exception::class,
-        'Class Tests\Unit\Classes\BadRiverElement must extend LsvEu\Rivers\Cartography\RiverElement',
+        'Class Tests\Unit\Classes\BadRiverElement must extend or be LsvEu\Rivers\Cartography\RiverElement',
     );
 });
 
