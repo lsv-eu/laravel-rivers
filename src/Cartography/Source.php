@@ -29,6 +29,14 @@ abstract class Source extends RiverElement
         $this->restartable = $attributes['restartable'] ?? false;
     }
 
+    public function check(mixed $model): bool
+    {
+        return $this->conditions->reduce(
+            callback: fn (bool $carry, Condition $condition) => $carry && $condition->check($model),
+            initial: true,
+        );
+    }
+
     public function createRaft(): mixed
     {
         return [];
@@ -42,14 +50,6 @@ abstract class Source extends RiverElement
     public function getStartListener(): ?string
     {
         return null;
-    }
-
-    public function check(mixed $model): bool
-    {
-        return $this->conditions->reduce(
-            callback: fn (bool $carry, Condition $condition) => $carry && $condition->check($model),
-            initial: true,
-        );
     }
 
     public function toArray(): array
