@@ -21,6 +21,11 @@ class RiversServiceProvider extends ServiceProvider
         $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
         // $this->loadRoutesFrom(__DIR__.'/routes.php');
 
+        // Registering package commands.
+        $this->commands([
+            Console\Commands\CheckTimedBridges::class,
+        ]);
+
         if ($this->app->runningInConsole()) {
             $this->publishes([
                 __DIR__.'/../config/config.php' => config_path('rivers.php'),
@@ -41,11 +46,7 @@ class RiversServiceProvider extends ServiceProvider
                 __DIR__.'/../resources/lang' => resource_path('lang/vendor/rivers'),
             ], 'lang');*/
 
-            // Registering package commands.
-            $this->commands([
-                Console\Commands\CheckTimedBridges::class,
-            ]);
-
+            // Registering schedules
             if (config('rivers.use_timed_bridges')) {
                 Schedule::command('rivers:check-timed-bridges')->everyMinute();
             }
