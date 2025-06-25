@@ -81,5 +81,6 @@ it('should pause and resume timed bridges', function () {
     $this->artisan('rivers:check_timed_bridges', ['--exact' => true]);
     $river->refresh();
     expect($river->riverRuns->first()->at_bridge)->toBeFalse()
-        ->and($river->riverRuns->first()->location)->toBe('pause-rapid');
+        ->and($river->riverRuns->first()->location)->toBe('pause-rapid')
+        ->and($river->riverRuns->first()->riverTimedBridge)->toBeNull();
 });

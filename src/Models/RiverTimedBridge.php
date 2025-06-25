@@ -32,6 +32,7 @@ class RiverTimedBridge extends Model
     {
         $this->riverRun->update(['at_bridge' => false]);
         Config::get('rivers.job_class')::dispatch($this->river_run_id);
+        $this->delete();
     }
 
     protected function resumeAt(): Attribute
