@@ -30,6 +30,7 @@ class Connection extends RiverElement
     public static function startOptions(RiverMap $map): array
     {
         return array_merge(
+            $map->bridges->pluck('id')->all(),
             $map->forks->pluck('id')->all(),
             $map->rapids->pluck('id')->all(),
             $map->sources->pluck('id')->all(),
@@ -44,6 +45,7 @@ class Connection extends RiverElement
     public static function endOptions(RiverMap $map, bool $startIsFork = false): array
     {
         return array_merge(
+            $map->bridges->pluck('id')->all(),
             $startIsFork ? [] : $map->forks->pluck('id')->all(),
             $map->rapids->pluck('id')->all(),
             $map->sources->pluck('id')->all(),
@@ -75,9 +77,9 @@ class Connection extends RiverElement
         }
 
         if ($this->startId === $this->endId) {
-            $errors['endId'] = "Connection end cannot be same as start.";
-        } elseif($start instanceof Fork && $end instanceof Fork) {
-            $errors['endId'] = "Connection end cannot be a fork if the start is a fork.";
+            $errors['endId'] = 'Connection end cannot be same as start.';
+        } elseif ($start instanceof Fork && $end instanceof Fork) {
+            $errors['endId'] = 'Connection end cannot be a fork if the start is a fork.';
         } elseif (! in_array($this->endId, $this->endOptions($map, (bool) $this->startConditionId))) {
             $errors['endId'] = "Connection end, $this->endId, does not exist.";
         }

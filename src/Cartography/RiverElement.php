@@ -14,6 +14,11 @@ abstract class RiverElement implements Arrayable
         $this->id = $attributes['id'] ?? Ulid::generate();
     }
 
+    public function getAllRiverElements(): array
+    {
+        return [$this];
+    }
+
     public function toArray(): array
     {
         return [

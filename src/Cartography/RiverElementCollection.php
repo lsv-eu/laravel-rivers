@@ -15,6 +15,11 @@ use Illuminate\Support\Collection;
  */
 class RiverElementCollection extends Collection
 {
+    public function getAllRiverElements(): array
+    {
+        return $this->map(fn (RiverElement $element) => $element->getAllRiverElements())->all();
+    }
+
     public function toArray(): array
     {
         return $this

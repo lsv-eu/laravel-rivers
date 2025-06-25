@@ -24,6 +24,14 @@ abstract class ModelRaft extends Raft
         $this->record = (static::$modelClass)::find($this->modelId);
     }
 
+    public function resolveProvidedInjection(string $name): mixed
+    {
+        return match ($name) {
+            $this->getRaftName() => new static(['modelId' => $this->modelId]),
+            default => null,
+        };
+    }
+
     public function toArray(): array
     {
         return [

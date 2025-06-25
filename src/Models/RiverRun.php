@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Carbon;
 use LsvEu\Rivers\Contracts\Raft;
 
@@ -38,8 +39,10 @@ class RiverRun extends Model
     protected function casts(): array
     {
         return [
+            'at_bridge' => 'boolean',
             'completed_at' => 'datetime',
             'listeners' => 'json',
+            'running' => 'boolean',
         ];
     }
 
@@ -56,6 +59,11 @@ class RiverRun extends Model
     public function riverInterrupts(): HasMany
     {
         return $this->hasMany(RiverInterrupt::class);
+    }
+
+    public function riverTimedBridge(): HasOne
+    {
+        return $this->hasOne(RiverTimedBridge::class);
     }
 
     public function scopeHasListener(Builder $query, string $event): void

@@ -6,7 +6,7 @@ stream, pipeline, etcetera carry a lot of expectations and assumptions that caus
 
 
 ### River
-A series of one or more rapids and/or dams that starts with at least one source.
+A collection of Sources, Rapids, Forks and Bridges that are connected.
 
 ### Raft
 The thing traveling down a river.
@@ -22,7 +22,7 @@ An event that adds a raft to a river or ports a raft to a different point on a r
 - Tag applied
 
 ### Ripple
-An action that affects the raft.
+An action that acted on the raft.
 
 - Notification
 - Data modification
@@ -30,8 +30,8 @@ An action that affects the raft.
 ### Rapid
 An uninterruptible sequence of ripples
 
-### Dam
-Anything that halts a river from flowing temporarily.
+### Bridge
+Anything that halts a raft from proceeding temporarily.
 
 - Timed delay
 - Waiting for data to change

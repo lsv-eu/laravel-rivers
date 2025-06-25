@@ -2,8 +2,9 @@
 
 namespace LsvEu\Rivers\Cartography;
 
+use LsvEu\Rivers\Actions\EvaluateRiverElement;
 use LsvEu\Rivers\Cartography\Fork\Condition;
-use LsvEu\Rivers\Contracts\Raft;
+use LsvEu\Rivers\Models\RiverRun;
 
 class Fork extends RiverElement
 {
@@ -19,21 +20,27 @@ class Fork extends RiverElement
         $this->conditions = RiverElementCollection::make($attributes['conditions'] ?? []);
     }
 
-    public function toArray(): array
+    public function getAllRiverElements(): array
     {
-        return parent::toArray() + [
-            'conditions' => $this->conditions->toArray(),
-        ];
+        return array_merge([$this], $this->conditions->all());
     }
 
     /**
      * Determines and returns the next identifier based on the specified raft and conditions.
      *
-     * @param  Raft  $raft  The raft object to be evaluated by the conditions.
      * @return string The identifier of the next item, or the fork's identifier if no condition is satisfied.
      */
-    public function getNext(Raft $raft): string
+    public function getNext(RiverRun $run): string
     {
-        return $this->conditions->first(fn (Condition $condition) => $condition->check($raft))?->id ?? $this->id;
+        return $this->conditions
+            ->first(fn (Condition $condition) => EvaluateRiverElement::run($run, $condition->id))
+            ?->id ?? $this->id;
+    }
+
+    public function toArray(): array
+    {
+        return parent::toArray() + [
+            'conditions' => $this->conditions->toArray(),
+        ];
     }
 }

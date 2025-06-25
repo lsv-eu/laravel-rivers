@@ -13,6 +13,11 @@ class RiverMap implements \JsonSerializable, Arrayable, CastsAttributes
     use SerializesData;
 
     /**
+     * @var RiverElementCollection<string, Bridge>
+     */
+    public RiverElementCollection $bridges;
+
+    /**
      * @var RiverElementCollection<string, Connection>
      */
     public RiverElementCollection $connections;
@@ -36,6 +41,7 @@ class RiverMap implements \JsonSerializable, Arrayable, CastsAttributes
 
     public function __construct(array $attributes = [])
     {
+        $this->bridges = RiverElementCollection::make($attributes['bridges'] ?? [], Bridge::class);
         $this->connections = RiverElementCollection::make($attributes['connections'] ?? [], Connection::class);
         $this->forks = RiverElementCollection::make($attributes['forks'] ?? [], Fork::class);
         $this->rapids = RiverElementCollection::make($attributes['rapids'] ?? [], Rapid::class);
@@ -46,10 +52,20 @@ class RiverMap implements \JsonSerializable, Arrayable, CastsAttributes
 
     public function getElementById(string $id): ?RiverElement
     {
-        return $this->connections->get($id) ??
-            $this->forks->get($id) ??
-            $this->rapids->get($id) ??
-            $this->sources->get($id);
+        return $this->getAllRiverElements()->get($id);
+    }
+
+    public function getAllRiverElements(): Collection
+    {
+        return collect([
+            ...$this->bridges->getAllRiverElements(),
+            ...$this->connections->getAllRiverElements(),
+            ...$this->forks->getAllRiverElements(),
+            ...$this->rapids->getAllRiverElements(),
+            ...$this->sources->getAllRiverElements(),
+        ])
+            ->flatten(1)
+            ->keyBy('id');
     }
 
     public function getInterruptListeners(Raft $raft): array
@@ -81,6 +97,7 @@ class RiverMap implements \JsonSerializable, Arrayable, CastsAttributes
             'rapids' => $this->rapids->toArray(),
             'connections' => $this->connections->toArray(),
             'forks' => $this->forks->toArray(),
+            'bridges' => $this->bridges->toArray(),
             'repeatable' => $this->repeatable,
         ];
     }
@@ -90,6 +107,9 @@ class RiverMap implements \JsonSerializable, Arrayable, CastsAttributes
         // The collect() on each collection is necessary to convert it to a normal collection or else ->toArray() blows
         // up since it's expecting different content.
         return collect([
+            'bridges' => $this->bridges
+                ->collect()
+                ->filter(fn ($bridge) => ! $bridge instanceof Bridge),
             'connections' => $this->connections
                 ->collect()
                 ->map(fn ($connection, $id) => when(

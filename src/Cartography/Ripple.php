@@ -2,9 +2,9 @@
 
 namespace LsvEu\Rivers\Cartography;
 
-use LsvEu\Rivers\Contracts\Raft;
+use LsvEu\Rivers\Contracts\CanBeProcessed;
 
-abstract class Ripple extends RiverElement
+abstract class Ripple extends RiverElement implements CanBeProcessed
 {
     public ?string $description = null;
 
@@ -24,6 +24,4 @@ abstract class Ripple extends RiverElement
             'name' => $this->name,
         ];
     }
-
-    abstract public function process(Raft $raft): void;
 }

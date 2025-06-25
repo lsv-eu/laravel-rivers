@@ -34,6 +34,7 @@ class CreateRiverTables extends Migration
             $table->ulid('id')->primary();
             $table->foreignIdFor(River::class)->constrained()->cascadeOnDelete();
             $table->boolean('running')->default(false);
+            $table->boolean('at_bridge')->default(false);
             $table->string('location')->nullable();
             $table->longText('listeners');
             $table->longText('raft');
@@ -47,6 +48,15 @@ class CreateRiverTables extends Migration
             $table->string('event');
             $table->boolean('checked')->default(false);
             $table->longText('details');
+            $table->timestamps();
+        });
+
+        Schema::create('river_timed_bridges', function (Blueprint $table) {
+            $table->ulid('id')->primary();
+            $table->foreignIdFor(RiverRun::class)->constrained()->cascadeOnDelete();
+            $table->string('location');
+            $table->timestamp('resume_at');
+            $table->boolean('paused');
             $table->timestamps();
         });
     }

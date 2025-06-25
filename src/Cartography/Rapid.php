@@ -2,9 +2,11 @@
 
 namespace LsvEu\Rivers\Cartography;
 
-use LsvEu\Rivers\Contracts\Raft;
+use LsvEu\Rivers\Actions\ProcessRiverElement;
+use LsvEu\Rivers\Contracts\CanBeProcessed;
+use LsvEu\Rivers\Models\RiverRun;
 
-class Rapid extends RiverElement
+class Rapid extends RiverElement implements CanBeProcessed
 {
     public string $label = '';
 
@@ -21,12 +23,15 @@ class Rapid extends RiverElement
         $this->ripples = RiverElementCollection::make($attributes['ripples'] ?? []);
     }
 
-    public function process(Raft $raft): void
+    public function getAllRiverElements(): array
+    {
+        return array_merge([$this], $this->ripples->all());
+    }
+
+    public function process(?RiverRun $riverRun = null): void
     {
         $this->ripples
-            ->each(function (Ripple $ripple) use ($raft) {
-                $ripple->process($raft);
-            });
+            ->each(fn (Ripple $ripple) => ProcessRiverElement::run($riverRun, $ripple->id));
     }
 
     public function toArray(): array

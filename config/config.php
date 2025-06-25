@@ -12,6 +12,8 @@ return [
 
     'job_class' => \LsvEu\Rivers\Jobs\ProcessRiverRun::class,
 
+    'use_timed_bridges' => env('RIVERS_USE_TIMED_BRIDGES', true),
+
     /*
      * List of classes that are observed.
      */

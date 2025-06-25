@@ -8,7 +8,7 @@ use LsvEu\Rivers\Models\River;
 
 class PausingRipple extends Ripple
 {
-    public function process(Raft $raft): void
+    public function process(?Raft $raft = null): void
     {
         River::whereStatus('active')->update(['status' => 'paused']);
     }

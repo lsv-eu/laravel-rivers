@@ -7,12 +7,16 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Event;
 use LsvEu\Rivers\Cartography\RiverMap;
 use LsvEu\Rivers\Cartography\Source;
 use LsvEu\Rivers\Contracts\CreatesRaft;
 use LsvEu\Rivers\Contracts\Raft;
+use LsvEu\Rivers\Events\RiverPausedEvent;
+use LsvEu\Rivers\Events\RiverResumedEvent;
 use LsvEu\Rivers\Exceptions\InvalidRiverMapException;
 
 /**
@@ -39,6 +43,16 @@ class River extends Model
         static::saving(function (River $river) {
             $river->listeners = $river->status == 'active' ? array_values($river->map->getStartListeners()) : [];
         });
+
+        static::updated(function (River $river) {
+            if ($river->wasChanged('status')) {
+                if ($river->status === 'active' && $river->getOriginalWithoutRewindingModel('status') === 'paused') {
+                    Event::dispatch(RiverResumedEvent::class, [$river]);
+                } elseif ($river->status === 'paused' && $river->getOriginalWithoutRewindingModel('status') === 'active') {
+                    Event::dispatch(RiverPausedEvent::class, [$river]);
+                }
+            }
+        });
     }
 
     protected function casts(): array
@@ -52,6 +66,14 @@ class River extends Model
     public function riverRuns(): HasMany
     {
         return $this->hasMany(RiverRun::class);
+    }
+
+    public function riverTimedBridges(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            RiverTimedBridge::class,
+            RiverRun::class,
+        );
     }
 
     public function versions(): HasMany
@@ -72,6 +94,18 @@ class River extends Model
     public function isPaused(): bool
     {
         return $this->status !== 'active';
+    }
+
+    public function pause(): void
+    {
+        $this->status = 'paused';
+        $this->save();
+    }
+
+    public function resume(): void
+    {
+        $this->status = 'active';
+        $this->save();
     }
 
     public function startRun(string $event, CreatesRaft|Raft $raft, Source $source): void

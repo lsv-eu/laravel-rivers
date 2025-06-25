@@ -3,8 +3,7 @@
 namespace Tests\Feature\Classes;
 
 use LsvEu\Rivers\Cartography\Fork\Condition;
-use LsvEu\Rivers\Contracts\Raft;
-use Workbench\App\Models\User;
+use Workbench\App\Rivers\Rafts\UserRaft;
 
 class NameCondition extends Condition
 {
@@ -16,15 +15,15 @@ class NameCondition extends Condition
         $this->name = $attributes['name'] ?? '';
     }
 
-    public function check(Raft|User $raft): bool
-    {
-        return $raft->name == $this->name;
-    }
-
     public function toArray(): array
     {
         return parent::toArray() + [
             'name' => $this->name,
         ];
+    }
+
+    public function evaluate(?UserRaft $user = null): bool
+    {
+        return $user->name == $this->name;
     }
 }

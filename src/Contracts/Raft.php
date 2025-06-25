@@ -6,6 +6,8 @@ use ReflectionMethod;
 
 abstract class Raft
 {
+    use ProvidesInjections;
+
     protected array $properties;
 
     public function __construct(array $data) {}

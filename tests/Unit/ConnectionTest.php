@@ -7,7 +7,6 @@ use LsvEu\Rivers\Cartography\Fork;
 use LsvEu\Rivers\Cartography\Rapid;
 use LsvEu\Rivers\Cartography\RiverMap;
 use LsvEu\Rivers\Cartography\Source;
-use LsvEu\Rivers\Contracts\Raft;
 
 it('should give valid start options', function () {
     $map = getMap();
@@ -59,7 +58,7 @@ function getMap(?array $connections = null): RiverMap
 
     $fakeForkCondition = new class extends Fork\Condition
     {
-        public function check(Raft $raft): bool
+        public function evaluate(): bool
         {
             return true;
         }

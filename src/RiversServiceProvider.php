@@ -2,6 +2,8 @@
 
 namespace LsvEu\Rivers;
 
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Schedule;
 use Illuminate\Support\ServiceProvider;
 
 class RiversServiceProvider extends ServiceProvider
@@ -40,8 +42,18 @@ class RiversServiceProvider extends ServiceProvider
             ], 'lang');*/
 
             // Registering package commands.
-            // $this->commands([]);
+            $this->commands([
+                Console\Commands\CheckTimedBridges::class,
+            ]);
+
+            if (config('rivers.use_timed_bridges')) {
+                Schedule::command('rivers:check-timed-bridges')->everyMinute();
+            }
         }
+
+        // Register event listeners
+        Event::listen(Events\RiverPausedEvent::class, Listeners\PauseRiverTimedBridges::class);
+        Event::listen(Events\RiverResumedEvent::class, Listeners\ResumeRiverTimedBridges::class);
     }
 
     /**

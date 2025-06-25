@@ -7,6 +7,7 @@ use Illuminate\Database\RecordNotFoundException;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Config;
+use LsvEu\Rivers\Actions\ProcessRiverElement;
 use LsvEu\Rivers\Cartography\Fork;
 use LsvEu\Rivers\Models\RiverRun;
 
@@ -86,9 +87,12 @@ class ProcessRiverRun implements ShouldQueue
             return;
         }
 
-        $next = $run->river->map->forks->get($connection->endId) ?? $run->river->map->rapids->get($connection->endId);
+        $next = $run->river->map->bridges->get($connection->endId)
+            ?? $run->river->map->forks->get($connection->endId)
+            ?? $run->river->map->rapids->get($connection->endId);
+
         if ($next instanceof Fork) {
-            $nextConnectionConditionId = $next->getNext($run->raft);
+            $nextConnectionConditionId = $next->getNext($run);
             $nextConnection = $run->river->map->connections
                 ->where('startId', $next->id)
                 ->where('startConditionId', $next->id != $nextConnectionConditionId ? $nextConnectionConditionId : null)
@@ -104,7 +108,8 @@ class ProcessRiverRun implements ShouldQueue
             $next = $run->river->map->rapids->get($nextConnection->endId);
         }
 
-        $next->process($run->raft);
+        ProcessRiverElement::run($run, $next->id);
+        // $next->process($run->raft);
 
         $run->location = $next->id;
         $run->save();
@@ -113,7 +118,9 @@ class ProcessRiverRun implements ShouldQueue
         if ($this->handleInterrupt($run)) {
             return;
         } elseif (! $run->river->isPaused()) {
-            static::dispatch($run);
+            if (! $run->at_bridge) {
+                static::dispatch($run->id);
+            }
             $run->update(['running' => true]);
         } else {
             $run->update(['running' => false]);
