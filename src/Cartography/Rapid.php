@@ -31,7 +31,7 @@ class Rapid extends RiverElement implements CanBeProcessed
     public function process(?RiverRun $riverRun = null): void
     {
         $this->ripples
-            ->each(fn (Ripple $ripple) => ProcessRiverElement::run($riverRun, $ripple->id));
+            ->each(fn (Ripple $ripple) => ProcessRiverElement::run($riverRun, $ripple));
     }
 
     public function toArray(): array

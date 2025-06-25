@@ -33,7 +33,7 @@ class Fork extends RiverElement
     public function getNext(RiverRun $run): string
     {
         return $this->conditions
-            ->first(fn (Condition $condition) => EvaluateRiverElement::run($run, $condition->id))
+            ->first(fn (Condition $condition) => EvaluateRiverElement::run($run, $condition))
             ?->id ?? $this->id;
     }
 

@@ -2,36 +2,20 @@
 
 namespace LsvEu\Rivers\Actions;
 
-use LsvEu\Rivers\Contracts\CanBeProcessed;
+use LsvEu\Rivers\Cartography\RiverElement;
 use LsvEu\Rivers\Models\RiverRun;
-use ReflectionMethod;
 
 class ProcessRiverElement
 {
-    protected array $injections;
+    public function __construct(protected RiverRun $run) {}
 
-    public function __construct(protected RiverRun $run)
+    public static function run(RiverRun $run, RiverElement $element, string $method = 'process'): void
     {
-        $this->injections = GetRiverRunInjections::run($run);
+        (new static($run))->handle($element, $method);
     }
 
-    public static function run(RiverRun $run, string $id): void
+    public function handle(RiverElement $element, string $method = 'evaluate'): void
     {
-        (new static($run))->handle($id);
-    }
-
-    public function handle(string $id): void
-    {
-        $element = $this->run->river->map->getElementById($id);
-
-        if ($element instanceof CanBeProcessed) {
-            $dependencies = [];
-
-            foreach ((new ReflectionMethod($element::class, 'process'))->getParameters() as $parameter) {
-                $dependencies[] = $this->injections[$parameter->name]() ?? null;
-            }
-
-            $element->process(...$dependencies);
-        }
+        EvaluateRiverElement::run($this->run, $element, $method);
     }
 }

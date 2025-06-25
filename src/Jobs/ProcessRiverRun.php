@@ -108,8 +108,7 @@ class ProcessRiverRun implements ShouldQueue
             $next = $run->river->map->rapids->get($nextConnection->endId);
         }
 
-        ProcessRiverElement::run($run, $next->id);
-        // $next->process($run->raft);
+        ProcessRiverElement::run($run, $next);
 
         $run->location = $next->id;
         $run->save();

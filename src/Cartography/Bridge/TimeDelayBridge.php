@@ -4,11 +4,8 @@ namespace LsvEu\Rivers\Cartography\Bridge;
 
 use DateInterval;
 use Exception;
-use LsvEu\Rivers\Cartography\Bridge;
-use LsvEu\Rivers\Models\RiverRun;
-use LsvEu\Rivers\Models\RiverTimedBridge;
 
-class TimeDelayBridge extends Bridge
+class TimeDelayBridge extends TimedBridge
 {
     public string $duration;
 
@@ -24,17 +21,9 @@ class TimeDelayBridge extends Bridge
         new DateInterval($this->duration);
     }
 
-    public function process(?RiverRun $riverRun = null): void
+    public function getDateInterval(): DateInterval
     {
-        RiverTimedBridge::create([
-            'river_run_id' => $riverRun->id,
-            'resume_at' => now()->add(new DateInterval($this->duration)),
-            'location' => $this->id,
-            'paused' => ! $riverRun->running,
-        ]);
-
-        $riverRun->at_bridge = true;
-        $riverRun->save();
+        return new DateInterval($this->duration);
     }
 
     public function toArray(): array

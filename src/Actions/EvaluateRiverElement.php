@@ -2,7 +2,7 @@
 
 namespace LsvEu\Rivers\Actions;
 
-use LsvEu\Rivers\Contracts\CanBeEvaluated;
+use LsvEu\Rivers\Cartography\RiverElement;
 use LsvEu\Rivers\Exceptions\NotEvaluatableException;
 use LsvEu\Rivers\Models\RiverRun;
 use ReflectionMethod;
@@ -16,25 +16,23 @@ class EvaluateRiverElement
         $this->injections = GetRiverRunInjections::run($run);
     }
 
-    public static function run(RiverRun $run, string $id): mixed
+    public static function run(RiverRun $run, RiverElement $element, string $method = 'evaluate'): mixed
     {
-        return (new static($run))->handle($id);
+        return (new static($run))->handle($element, $method);
     }
 
-    public function handle(string $id): mixed
+    public function handle(RiverElement $element, string $method = 'evaluate'): mixed
     {
-        $element = $this->run->river->map->getElementById($id);
-
-        if (! $element instanceof CanBeEvaluated) {
+        if (! method_exists($element, $method)) {
             throw new (NotEvaluatableException::class);
         }
 
         $dependencies = [];
 
-        foreach ((new ReflectionMethod($element::class, 'evaluate'))->getParameters() as $parameter) {
+        foreach ((new ReflectionMethod($element::class, $method))->getParameters() as $parameter) {
             $dependencies[] = $this->injections[$parameter->name]() ?? null;
         }
 
-        return $element->evaluate(...$dependencies);
+        return $element->$method(...$dependencies);
     }
 }
