@@ -4,13 +4,14 @@ namespace LsvEu\Rivers\Models;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use LsvEu\Rivers\Contracts\Raft;
 
 /**
@@ -19,7 +20,8 @@ use LsvEu\Rivers\Contracts\Raft;
  * @property River $river
  * @property Raft $raft
  * @property string[] $listeners The listeners that can trigger an interrupt
- * @property Collection<string, RiverInterrupt> $interrupts The interrupts that have been triggered
+ * @property EloquentCollection<string, RiverInterrupt> $interrupts The interrupts that have been triggered
+ * @property Collection<string, Raft> $sweeps Sweeps (additional cargo rafts)
  */
 class RiverRun extends Model
 {
@@ -74,6 +76,27 @@ class RiverRun extends Model
         return Attribute::make(
             get: fn (): Raft => Raft::hydrate($this->attributes['raft']),
             set: fn (Raft $raft) => ['raft' => $raft->deyhdrate()],
+        );
+    }
+
+    protected function sweeps(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value): Collection => collect(json_decode($value))->map(fn ($sweep) => Raft::hydrate($sweep)),
+            set: function (Collection|array|null $sweeps) {
+                if (is_null($sweeps)) {
+                    $sweeps = collect();
+                }
+                if (is_array($sweeps)) {
+                    $sweeps = collect($sweeps);
+                }
+
+                if ($sweeps->keys()->contains(fn ($key) => is_int($key))) {
+                    throw new \Exception('Cannot add sweep without name');
+                }
+
+                return ['sweeps' => $sweeps->map(fn (Raft $sweep) => $sweep->deyhdrate())->toJson()];
+            },
         );
     }
 }

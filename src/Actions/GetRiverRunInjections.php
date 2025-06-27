@@ -8,9 +8,10 @@ class GetRiverRunInjections
 {
     public function __construct(protected RiverRun $run) {}
 
-    public function handle(): array
+    public function handle(bool $withSweeps = true): array
     {
         return [
+            ...when($withSweeps, $this->run->sweeps->map(fn ($sweep) => fn () => $sweep), []),
             ...collect($this->run->raft->getInjectionNames())
                 ->mapWithKeys(fn ($name) => [$name => fn () => $this->run->raft->resolveProvidedInjection($name)])
                 ->toArray(),
@@ -22,8 +23,8 @@ class GetRiverRunInjections
         ];
     }
 
-    public static function run(RiverRun $run): array
+    public static function run(RiverRun $run, bool $withSweeps = true): array
     {
-        return (new static($run))->handle();
+        return (new static($run))->handle($withSweeps);
     }
 }
