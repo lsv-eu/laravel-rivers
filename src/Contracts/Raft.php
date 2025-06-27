@@ -2,6 +2,7 @@
 
 namespace LsvEu\Rivers\Contracts;
 
+use LsvEu\Rivers\Concerns\ProvidesInjections;
 use ReflectionMethod;
 
 abstract class Raft

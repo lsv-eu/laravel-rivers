@@ -1,6 +1,6 @@
 <?php
 
-namespace LsvEu\Rivers\Contracts;
+namespace LsvEu\Rivers\Concerns;
 
 trait ProvidesInjections
 {
