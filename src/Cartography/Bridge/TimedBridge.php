@@ -18,10 +18,10 @@ abstract class TimedBridge extends Bridge
             'river_run_id' => $riverRun->id,
             'resume_at' => now()->add(EvaluateRiverElement::run($riverRun, $this, 'getDateInterval')),
             'location' => $this->id,
-            'paused' => ! $riverRun->running,
+            'paused' => $riverRun->status === 'paused',
         ]);
 
-        $riverRun->at_bridge = true;
+        $riverRun->status = 'bridge';
         $riverRun->save();
     }
 }

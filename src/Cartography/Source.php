@@ -2,8 +2,9 @@
 
 namespace LsvEu\Rivers\Cartography;
 
-use LsvEu\Rivers\Cartography\Source\Conditions\Condition;
+use LsvEu\Rivers\Actions\EvaluateRiverElement;
 use LsvEu\Rivers\Contracts\Raft;
+use LsvEu\Rivers\Models\RiverRun;
 
 abstract class Source extends RiverElement
 {
@@ -29,10 +30,10 @@ abstract class Source extends RiverElement
         $this->restartable = $attributes['restartable'] ?? false;
     }
 
-    public function check(mixed $model): bool
+    public function check(RiverRun $run): bool
     {
         return $this->conditions->reduce(
-            callback: fn (bool $carry, Condition $condition) => $carry && $condition->check($model),
+            callback: fn (bool $carry, Condition $condition) => $carry && EvaluateRiverElement::run($run, $condition),
             initial: true,
         );
     }

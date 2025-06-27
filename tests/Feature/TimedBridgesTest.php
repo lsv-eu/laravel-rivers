@@ -46,7 +46,7 @@ it('should queue listeners when enabled and handle pausing', function () {
     Queue::assertPushed(CallQueuedListener::class, fn ($listener) => $listener->class === ResumeRiverTimedBridges::class);
 });
 
-it('should pause and resume timed bridges', function () {
+it('should resume processing', function () {
     $map = new RiverMap([
         'sources' => [new ModelCreated(['id' => 'user-created', 'class' => User::class])],
         'bridges' => [new TimeDelayBridge(['id' => 'time-bridge', 'duration' => 'P1D'])],
@@ -67,7 +67,7 @@ it('should pause and resume timed bridges', function () {
     User::factory()->create();
 
     expect($river->riverRuns->count())->toBe(1)
-        ->and($river->riverRuns->first()->at_bridge)->toBeTrue()
+        ->and($river->riverRuns->first()->status)->toBe('bridge')
         ->and($river->riverRuns->first()->location)->toBe('time-bridge')
         ->and($river->riverRuns->first()->riverTimedBridge->resume_at->format('Y-m-d H:i:s'))->toBe('2020-01-02 01:00:00');
     // ->and($river->riverRuns->first());
@@ -75,12 +75,12 @@ it('should pause and resume timed bridges', function () {
     $this->travelTo('2020-01-02 00:59:30');
     $this->artisan('rivers:check_timed_bridges', ['--exact' => true]);
     $river->refresh();
-    expect($river->riverRuns->first()->at_bridge)->toBeTrue();
+    expect($river->riverRuns->first()->status)->toBe('bridge');
 
     $this->travelTo('2020-01-02 01:00:30');
     $this->artisan('rivers:check_timed_bridges', ['--exact' => true]);
     $river->refresh();
-    expect($river->riverRuns->first()->at_bridge)->toBeFalse()
+    expect($river->riverRuns->first()->status)->toBe('paused')
         ->and($river->riverRuns->first()->location)->toBe('pause-rapid')
         ->and($river->riverRuns->first()->riverTimedBridge)->toBeNull();
 });

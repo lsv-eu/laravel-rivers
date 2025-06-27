@@ -1,23 +1,26 @@
 <?php
 
-use Illuminate\Database\Eloquent\Model;
+use LsvEu\Rivers\Cartography\Condition;
 use LsvEu\Rivers\Cartography\Source;
+use LsvEu\Rivers\Models\RiverRun;
 use Workbench\App\Models\User;
+use Workbench\App\Rivers\Rafts\UserRaft;
 
 test('source without conditions tests true', function () {
     $source = new class extends Source {};
     $user = User::factory()->create();
+    $run = new RiverRun(['raft' => $user->createRaft()]);
 
-    expect($source->check($user))->toBeTrue();
+    expect($source->check($run))->toBeTrue();
 });
 
 test('source with a condition tests correctly', function () {
     $sourceClass = new class extends Source {};
-    $condition = new class extends Source\Conditions\Condition
+    $condition = new class extends Condition
     {
-        public function check(Model $model): bool
+        public function evaluate(?UserRaft $raft = null): bool
         {
-            return $model->name === 'Good';
+            return $raft->name === 'Good';
         }
     };
     $source = new $sourceClass([
@@ -28,24 +31,27 @@ test('source with a condition tests correctly', function () {
     $userBad = User::factory()->create(['name' => 'Bad']);
     $userGood = User::factory()->create(['name' => 'Good']);
 
-    expect($source->check($userBad))->toBeFalse()
-        ->and($source->check($userGood))->toBeTrue();
+    $runBad = new RiverRun(['raft' => $userBad->createRaft()]);
+    $runGood = new RiverRun(['raft' => $userGood->createRaft()]);
+
+    expect($source->check($runBad))->toBeFalse()
+        ->and($source->check($runGood))->toBeTrue();
 });
 
 test('source with multiple conditions tests correctly', function () {
     $sourceClass = new class extends Source {};
-    $condition1 = new class extends Source\Conditions\Condition
+    $condition1 = new class extends Condition
     {
-        public function check(User|Model $model): bool
+        public function evaluate(?UserRaft $raft = null): bool
         {
-            return $model->name === 'Good';
+            return $raft->name === 'Good';
         }
     };
-    $condition2 = new class extends Source\Conditions\Condition
+    $condition2 = new class extends Condition
     {
-        public function check(User|Model $model): bool
+        public function evaluate(?UserRaft $raft = null): bool
         {
-            return $model->email === 'good@example.com';
+            return $raft->email === 'good@example.com';
         }
     };
 
@@ -59,6 +65,9 @@ test('source with multiple conditions tests correctly', function () {
     $userBad = User::factory()->create(['name' => 'Good', 'email' => 'bad@example.com']);
     $userGood = User::factory()->create(['name' => 'Good', 'email' => 'good@example.com']);
 
-    expect($source->check($userBad))->toBeFalse()
-        ->and($source->check($userGood))->toBeTrue();
+    $runBad = new RiverRun(['raft' => $userBad->createRaft()]);
+    $runGood = new RiverRun(['raft' => $userGood->createRaft()]);
+
+    expect($source->check($runBad))->toBeFalse()
+        ->and($source->check($runGood))->toBeTrue();
 });

@@ -39,10 +39,8 @@ class RiverRun extends Model
     protected function casts(): array
     {
         return [
-            'at_bridge' => 'boolean',
             'completed_at' => 'datetime',
             'listeners' => 'json',
-            'running' => 'boolean',
         ];
     }
 

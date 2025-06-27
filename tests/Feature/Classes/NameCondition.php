@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Classes;
 
-use LsvEu\Rivers\Cartography\Fork\Condition;
+use LsvEu\Rivers\Cartography\Condition;
 use Workbench\App\Rivers\Rafts\UserRaft;
 
 class NameCondition extends Condition

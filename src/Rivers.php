@@ -48,7 +48,7 @@ class Rivers
                         }
                     }
                     $source = $river->map->getSourceByStartListener($startEvent);
-                    if ($source->check($model)) {
+                    if ($source->check(new RiverRun(['river' => $river, 'raft' => $model->createRaft()]))) {
                         $river->startRun($startEvent, $model, $source);
                     }
                 }

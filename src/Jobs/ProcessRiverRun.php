@@ -59,13 +59,6 @@ class ProcessRiverRun implements ShouldQueue
             return;
         }
 
-        if ($run->completed_at) {
-            $this->delete();
-            $run->update(['running' => false, 'location' => null]);
-
-            return;
-        }
-
         // Check if there is a new interrupt
         if ($this->handleInterrupt($run)) {
             return;
@@ -73,10 +66,12 @@ class ProcessRiverRun implements ShouldQueue
 
         if ($run->river->isPaused()) {
             $this->delete();
-            $run->update(['running' => 'false']);
+            $run->update(['status' => 'paused']);
 
             return;
         }
+
+        $run->update(['status' => 'running']);
 
         $connection = $run->river->map->connections->firstWhere('startId', $run->location);
 
@@ -116,13 +111,12 @@ class ProcessRiverRun implements ShouldQueue
         $run->river->refresh();
         if ($this->handleInterrupt($run)) {
             return;
-        } elseif (! $run->river->isPaused()) {
-            if (! $run->at_bridge) {
+        } elseif ($run->river->isPaused()) {
+            $run->update(['status' => 'paused']);
+        } else {
+            if (! $run->status == 'bridge') {
                 static::dispatch($run->id);
             }
-            $run->update(['running' => true]);
-        } else {
-            $run->update(['running' => false]);
         }
     }
 
@@ -155,7 +149,7 @@ class ProcessRiverRun implements ShouldQueue
     {
         $run->completed_at = now();
         $run->location = null;
-        $run->running = false;
+        $run->status = 'completed';
         $run->save();
     }
 }

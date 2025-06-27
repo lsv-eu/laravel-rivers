@@ -2,6 +2,7 @@
 
 namespace Test\Unit;
 
+use LsvEu\Rivers\Cartography\Condition;
 use LsvEu\Rivers\Cartography\Connection;
 use LsvEu\Rivers\Cartography\Fork;
 use LsvEu\Rivers\Cartography\Rapid;
@@ -56,7 +57,7 @@ function getMap(?array $connections = null): RiverMap
 {
     $connections ??= [];
 
-    $fakeForkCondition = new class extends Fork\Condition
+    $fakeForkCondition = new class extends Condition
     {
         public function evaluate(): bool
         {

@@ -33,7 +33,7 @@ class CheckTimedBridges extends Command
                 fn (Builder $builder) => $builder->where('resume_at', '<=', $time),
             )
             ->whereHas('riverRun', function (Builder $query) {
-                $query->whereRunning(true);
+                $query->whereStatus('bridge');
             });
 
         $count = $bridgeQuery->count();

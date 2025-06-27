@@ -3,7 +3,6 @@
 namespace LsvEu\Rivers\Cartography;
 
 use LsvEu\Rivers\Actions\EvaluateRiverElement;
-use LsvEu\Rivers\Cartography\Fork\Condition;
 use LsvEu\Rivers\Models\RiverRun;
 
 class Fork extends RiverElement
