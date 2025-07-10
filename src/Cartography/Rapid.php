@@ -41,4 +41,9 @@ class Rapid extends RiverElement implements CanBeProcessed
             'ripples' => $this->ripples->toArray(),
         ];
     }
+
+    public function validate(RiverMap $map): ?array
+    {
+        return null;
+    }
 }

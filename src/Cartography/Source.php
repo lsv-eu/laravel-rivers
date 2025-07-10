@@ -62,4 +62,9 @@ abstract class Source extends RiverElement
             'restartable' => $this->restartable,
         ];
     }
+
+    public function validate(RiverMap $map): ?array
+    {
+        return null;
+    }
 }

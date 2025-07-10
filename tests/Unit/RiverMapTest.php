@@ -31,7 +31,39 @@ it('is valid with valid collections', function () {
 });
 
 it('is invalid with invalid collections', function () {
-    $badObject = new class extends RiverElement {};
+    $badObject = new class extends RiverElement
+    {
+        public string $id = 'foo';
+    };
+
+    $connectionMap = new RiverMap;
+    expect($connectionMap->validate())->not()->toHaveKey('connections');
+    $connectionMap->connections->put('foo', $badObject);
+    expect($errors = $connectionMap->validate())->toHaveKey('connections')
+        ->and($errors['connections'])->toHaveKey('foo')
+        ->and($errors['connections']['foo'])->toBe('Connection must be a \LsvEu\Rivers\Cartography\Connection object');
+
+    $forkMap = new RiverMap;
+    expect($forkMap->validate())->not()->toHaveKey('forks');
+    $forkMap->forks->put('foo', $badObject);
+    expect($errors = $forkMap->validate())->toHaveKey('forks')
+        ->and($errors['forks'])->toHaveKey('foo')
+        ->and($errors['forks']['foo'])->toBe('Fork must be a \LsvEu\Rivers\Cartography\Fork object');
+
+    $rapidMap = new RiverMap;
+    expect($rapidMap->validate())->not()->toHaveKey('rapids');
+    $rapidMap->rapids->put('foo', $badObject);
+    expect($errors = $rapidMap->validate())->toHaveKey('rapids')
+        ->and($errors['rapids'])->toHaveKey('foo')
+        ->and($errors['rapids']['foo'])->toBe('Rapid must be a \LsvEu\Rivers\Cartography\Rapid object');
+
+    $sourceMap = new RiverMap;
+    expect($sourceMap->validate())->not()->toHaveKey('sources');
+    $sourceMap->sources->put('foo', $badObject);
+    expect($errors = $sourceMap->validate())->toHaveKey('sources')
+        ->and($errors['sources'])->toHaveKey('foo')
+        ->and($errors['sources']['foo'])->toBe('Source must be a \LsvEu\Rivers\Cartography\Source object');
+});
 
     $badConnectionMap = new RiverMap;
     expect($badConnectionMap->isValid())->toBeTrue();

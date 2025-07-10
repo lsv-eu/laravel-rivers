@@ -42,4 +42,9 @@ class Fork extends RiverElement
             'conditions' => $this->conditions->toArray(),
         ];
     }
+
+    public function validate(RiverMap $map): ?array
+    {
+        return null;
+    }
 }

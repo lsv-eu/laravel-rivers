@@ -115,21 +115,33 @@ class RiverMap implements \JsonSerializable, Arrayable, CastsAttributes
                 ->map(fn ($connection, $id) => when(
                     $connection instanceof Connection,
                     $connection->validate($this),
-                    "Connection, {$id}, does not extend Connection",
+                    'Connection must be a \LsvEu\Rivers\Cartography\Connection object',
                 ))
                 ->filter(),
             'forks' => $this->forks
                 ->collect()
-                ->filter(fn ($fork) => ! $fork instanceof Fork)
-                ->each(fn ($fork) => $errors[] = "Fork {$fork->id} does not extend Fork"),
+                ->map(fn ($fork, $id) => when(
+                    $fork instanceof Fork,
+                    $fork->validate($this),
+                    'Fork must be a \LsvEu\Rivers\Cartography\Fork object',
+                ))
+                ->filter(),
             'rapids' => $this->rapids
                 ->collect()
-                ->filter(fn ($rapid) => ! $rapid instanceof Rapid)
-                ->each(fn ($rapid) => $errors[] = "Rapid {$rapid->id} does not extend Rapid"),
+                ->map(fn ($rapid, $id) => when(
+                    $rapid instanceof Rapid,
+                    $rapid->validate($this),
+                    'Rapid must be a \LsvEu\Rivers\Cartography\Rapid object',
+                ))
+                ->filter(),
             'sources' => $this->sources
                 ->collect()
-                ->filter(fn ($source) => ! $source instanceof Source)
-                ->each(fn ($source) => $errors[] = "Source {$source->id} does not extend Source"),
+                ->map(fn ($source, $id) => when(
+                    $source instanceof Source,
+                    $source->validate($this),
+                    "Source must be a \LsvEu\Rivers\Cartography\Source object",
+                ))
+                ->filter(),
         ])
             ->filter(fn (Collection $set) => $set->isNotEmpty())
             ->toArray();
