@@ -1,6 +1,6 @@
 <?php
 
-namespace LsvEu\Rivers\Cartography\Source;
+namespace LsvEu\Rivers\Cartography\Launches;
 
 use LsvEu\Rivers\Contracts\Raft;
 

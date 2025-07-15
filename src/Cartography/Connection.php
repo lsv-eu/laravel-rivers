@@ -33,7 +33,7 @@ class Connection extends RiverElement
             $map->bridges->pluck('id')->all(),
             $map->forks->pluck('id')->all(),
             $map->rapids->pluck('id')->all(),
-            $map->sources->pluck('id')->all(),
+            $map->launches->pluck('id')->all(),
         );
     }
 
@@ -48,7 +48,7 @@ class Connection extends RiverElement
             $map->bridges->pluck('id')->all(),
             $startIsFork ? [] : $map->forks->pluck('id')->all(),
             $map->rapids->pluck('id')->all(),
-            $map->sources->pluck('id')->all(),
+            $map->launches->pluck('id')->all(),
         );
     }
 

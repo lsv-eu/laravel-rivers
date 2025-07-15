@@ -22,8 +22,8 @@ test('create_users', function () {
 
 test('create_first_river', function () {
     $map = new RiverMap([
-        'sources' => [
-            new \LsvEu\Rivers\Cartography\Source\ModelCreated([
+        'launches' => [
+            new \LsvEu\Rivers\Cartography\Launches\ModelCreated([
                 'id' => Ulid::generate(),
                 'class' => \Workbench\App\Models\Taggable::class,
             ]),

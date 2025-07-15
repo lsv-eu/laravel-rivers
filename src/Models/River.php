@@ -12,8 +12,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Event;
 use LsvEu\Rivers\Cartography\RiverMap;
-use LsvEu\Rivers\Cartography\Source;
-use LsvEu\Rivers\Contracts\CreatesRaft;
 use LsvEu\Rivers\Contracts\Raft;
 use LsvEu\Rivers\Events\RiverPausedEvent;
 use LsvEu\Rivers\Events\RiverResumedEvent;
@@ -108,18 +106,12 @@ class River extends Model
         $this->save();
     }
 
-    public function startRun(string $event, CreatesRaft|Raft $raft, Source $source): void
+    public function startRun(string $event, Raft $raft, Launch $launch): void
     {
         if (! $this->isPaused()) {
             $run = $this->riverRuns()->create([
-                'raft' => $raft instanceof Raft ? $raft : $raft->createRaft(),
-                'location' => $source->id,
-            ]);
-
-            $run->interrupts()->create([
-                'event' => $event,
-                'checked' => true,
-                'details' => $raft->toArray(),
+                'raft' => $raft,
+                'location' => $launch->id,
             ]);
 
             Config::get('rivers.job_class')::dispatch($run->id);

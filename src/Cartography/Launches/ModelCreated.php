@@ -1,11 +1,11 @@
 <?php
 
-namespace LsvEu\Rivers\Cartography\Source;
+namespace LsvEu\Rivers\Cartography\Launches;
 
 use Illuminate\Database\Eloquent\Model;
-use LsvEu\Rivers\Cartography\Source;
+use LsvEu\Rivers\Cartography\Launch;
 
-class ModelCreated extends Source
+class ModelCreated extends Launch
 {
     public string $class;
 

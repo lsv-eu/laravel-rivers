@@ -6,7 +6,7 @@ use LsvEu\Rivers\Actions\EvaluateRiverElement;
 use LsvEu\Rivers\Contracts\Raft;
 use LsvEu\Rivers\Models\RiverRun;
 
-abstract class Source extends RiverElement
+abstract class Launch extends RiverElement
 {
     public string $id;
 

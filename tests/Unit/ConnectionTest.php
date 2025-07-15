@@ -5,9 +5,9 @@ namespace Test\Unit;
 use LsvEu\Rivers\Cartography\Condition;
 use LsvEu\Rivers\Cartography\Connection;
 use LsvEu\Rivers\Cartography\Fork;
+use LsvEu\Rivers\Cartography\Launch;
 use LsvEu\Rivers\Cartography\Rapid;
 use LsvEu\Rivers\Cartography\RiverMap;
-use LsvEu\Rivers\Cartography\Source;
 
 it('should give valid start options', function () {
     $map = getMap();
@@ -75,9 +75,9 @@ function getMap(?array $connections = null): RiverMap
             new class(['id' => 'r1']) extends Rapid {},
             new class(['id' => 'r2']) extends Rapid {},
         ],
-        'sources' => [
-            new class(['id' => 's1']) extends Source {},
-            new class(['id' => 's2']) extends Source {},
+        'launches' => [
+            new class(['id' => 's1']) extends Launch {},
+            new class(['id' => 's2']) extends Launch {},
         ],
     ]);
 }

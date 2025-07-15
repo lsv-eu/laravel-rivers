@@ -1,21 +1,21 @@
 <?php
 
 use LsvEu\Rivers\Cartography\Condition;
-use LsvEu\Rivers\Cartography\Source;
+use LsvEu\Rivers\Cartography\Launch;
 use LsvEu\Rivers\Models\RiverRun;
 use Workbench\App\Models\User;
 use Workbench\App\Rivers\Rafts\UserRaft;
 
-test('source without conditions tests true', function () {
-    $source = new class extends Source {};
+test('launch without conditions tests true', function () {
+    $launch = new class extends Launch {};
     $user = User::factory()->create();
     $run = new RiverRun(['raft' => $user->createRaft()]);
 
-    expect($source->check($run))->toBeTrue();
+    expect($launch->check($run))->toBeTrue();
 });
 
-test('source with a condition tests correctly', function () {
-    $sourceClass = new class extends Source {};
+test('launch with a condition tests correctly', function () {
+    $launchClass = new class extends Launch {};
     $condition = new class extends Condition
     {
         public function evaluate(?UserRaft $raft = null): bool
@@ -23,7 +23,7 @@ test('source with a condition tests correctly', function () {
             return $raft->name === 'Good';
         }
     };
-    $source = new $sourceClass([
+    $launch = new $launchClass([
         'conditions' => [
             $condition,
         ],
@@ -34,12 +34,12 @@ test('source with a condition tests correctly', function () {
     $runBad = new RiverRun(['raft' => $userBad->createRaft()]);
     $runGood = new RiverRun(['raft' => $userGood->createRaft()]);
 
-    expect($source->check($runBad))->toBeFalse()
-        ->and($source->check($runGood))->toBeTrue();
+    expect($launch->check($runBad))->toBeFalse()
+        ->and($launch->check($runGood))->toBeTrue();
 });
 
-test('source with multiple conditions tests correctly', function () {
-    $sourceClass = new class extends Source {};
+test('launch with multiple conditions tests correctly', function () {
+    $launchClass = new class extends Launch {};
     $condition1 = new class extends Condition
     {
         public function evaluate(?UserRaft $raft = null): bool
@@ -55,7 +55,7 @@ test('source with multiple conditions tests correctly', function () {
         }
     };
 
-    $source = new $sourceClass([
+    $launch = new $launchClass([
         'conditions' => [
             $condition1,
             $condition2,
@@ -68,6 +68,6 @@ test('source with multiple conditions tests correctly', function () {
     $runBad = new RiverRun(['raft' => $userBad->createRaft()]);
     $runGood = new RiverRun(['raft' => $userGood->createRaft()]);
 
-    expect($source->check($runBad))->toBeFalse()
-        ->and($source->check($runGood))->toBeTrue();
+    expect($launch->check($runBad))->toBeFalse()
+        ->and($launch->check($runGood))->toBeTrue();
 });

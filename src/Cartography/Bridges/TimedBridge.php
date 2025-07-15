@@ -1,6 +1,6 @@
 <?php
 
-namespace LsvEu\Rivers\Cartography\Bridge;
+namespace LsvEu\Rivers\Cartography\Bridges;
 
 use DateInterval;
 use LsvEu\Rivers\Actions\EvaluateRiverElement;

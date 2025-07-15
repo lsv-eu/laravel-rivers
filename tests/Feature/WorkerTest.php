@@ -1,8 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Queue;
+use LsvEu\Rivers\Cartography\Launches\ModelCreated;
 use LsvEu\Rivers\Cartography\RiverMap;
-use LsvEu\Rivers\Cartography\Source\ModelCreated;
 use LsvEu\Rivers\Jobs\ProcessRiverRun;
 use LsvEu\Rivers\Models\River;
 use LsvEu\Rivers\Models\RiverRun;
@@ -73,7 +73,7 @@ function createUserListeningRiver(string $status = 'active'): River
         'title' => 'Queue Test',
         'status' => $status,
         'map' => new RiverMap([
-            'sources' => [
+            'launches' => [
                 new ModelCreated([
                     'id' => 'user1',
                     'class' => User::class,

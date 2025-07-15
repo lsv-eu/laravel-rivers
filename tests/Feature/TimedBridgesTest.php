@@ -3,11 +3,11 @@
 namespace Tests\Feature;
 
 use Illuminate\Events\CallQueuedListener;
-use LsvEu\Rivers\Cartography\Bridge\TimeDelayBridge;
+use LsvEu\Rivers\Cartography\Bridges\TimeDelayBridge;
 use LsvEu\Rivers\Cartography\Connection;
+use LsvEu\Rivers\Cartography\Launches\ModelCreated;
 use LsvEu\Rivers\Cartography\Rapid;
 use LsvEu\Rivers\Cartography\RiverMap;
-use LsvEu\Rivers\Cartography\Source\ModelCreated;
 use LsvEu\Rivers\Listeners\PauseRiverTimedBridges;
 use LsvEu\Rivers\Listeners\ResumeRiverTimedBridges;
 use LsvEu\Rivers\Models\River;
@@ -48,7 +48,7 @@ it('should queue listeners when enabled and handle pausing', function () {
 
 it('should resume processing', function () {
     $map = new RiverMap([
-        'sources' => [new ModelCreated(['id' => 'user-created', 'class' => User::class])],
+        'launches' => [new ModelCreated(['id' => 'user-created', 'class' => User::class])],
         'bridges' => [new TimeDelayBridge(['id' => 'time-bridge', 'duration' => 'P1D'])],
         'rapids' => [new Rapid(['id' => 'pause-rapid', 'ripples' => [new PausingRipple]])],
         'connections' => [

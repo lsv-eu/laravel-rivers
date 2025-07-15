@@ -35,9 +35,9 @@ class RiverMap implements \JsonSerializable, Arrayable, CastsAttributes
     public bool $repeatable;
 
     /**
-     * @var RiverElementCollection<string, Source>
+     * @var RiverElementCollection<string, Launch>
      */
-    public RiverElementCollection $sources;
+    public RiverElementCollection $launches;
 
     public function __construct(array $attributes = [])
     {
@@ -45,7 +45,7 @@ class RiverMap implements \JsonSerializable, Arrayable, CastsAttributes
         $this->connections = RiverElementCollection::make($attributes['connections'] ?? [], Connection::class);
         $this->forks = RiverElementCollection::make($attributes['forks'] ?? [], Fork::class);
         $this->rapids = RiverElementCollection::make($attributes['rapids'] ?? [], Rapid::class);
-        $this->sources = RiverElementCollection::make($attributes['sources'] ?? [], Source::class);
+        $this->launches = RiverElementCollection::make($attributes['launches'] ?? [], Launch::class);
 
         $this->repeatable = false;
     }
@@ -62,27 +62,50 @@ class RiverMap implements \JsonSerializable, Arrayable, CastsAttributes
             ...$this->connections->getAllRiverElements(),
             ...$this->forks->getAllRiverElements(),
             ...$this->rapids->getAllRiverElements(),
-            ...$this->sources->getAllRiverElements(),
+            ...$this->launches->getAllRiverElements(),
         ])
             ->flatten(1)
             ->keyBy('id');
     }
 
-    public function getInterruptListeners(Raft $raft): array
+    public function getInterruptListenerEvents(Raft $raft): array
     {
-        return $this->sources->map(fn (Source $source) => $source->getInterruptListener($raft))->filter()->all();
+        return $this->getInterruptListeners($raft)->keys()->all();
     }
 
-    public function getSourceByStartListener(string $event): Source
+    /**
+     * @return Collection<string, Launch>
+     */
+    public function getInterruptListeners(Raft $raft): Collection
     {
-        return $this->sources
-            ->mapWithKeys(fn (Source $source) => [$source->getStartListener() => $source])
-            ->get($event);
+        return $this->launches
+            ->mapWithKeys(fn (Launch $launch) => [$launch->getInterruptListener($raft) => $launch])
+            ->filter();
     }
 
-    public function getStartListeners(): array
+    public function getLaunchByInterruptListener(string $event, Raft $raft): ?Launch
     {
-        return $this->sources->map(fn (Source $source) => $source->getStartListener())->filter()->all();
+        return $this->getInterruptListeners($raft)->get($event);
+    }
+
+    public function getLaunchByStartListener(string $event): ?Launch
+    {
+        return $this->getStartListeners()->get($event);
+    }
+
+    public function getStartListenerEvents(): array
+    {
+        return $this->getStartListeners()->keys()->all();
+    }
+
+    /**
+     * @return Collection<string, Launch>
+     */
+    public function getStartListeners(): Collection
+    {
+        return $this->launches
+            ->mapWithKeys(fn (Launch $launch) => [$launch->getStartListener() => $launch])
+            ->filter();
     }
 
     public function isValid(): bool
@@ -93,7 +116,7 @@ class RiverMap implements \JsonSerializable, Arrayable, CastsAttributes
     public function toArray(): array
     {
         return [
-            'sources' => $this->sources->toArray(),
+            'launches' => $this->launches->toArray(),
             'rapids' => $this->rapids->toArray(),
             'connections' => $this->connections->toArray(),
             'forks' => $this->forks->toArray(),
@@ -134,12 +157,12 @@ class RiverMap implements \JsonSerializable, Arrayable, CastsAttributes
                     'Rapid must be a \LsvEu\Rivers\Cartography\Rapid object',
                 ))
                 ->filter(),
-            'sources' => $this->sources
+            'launches' => $this->launches
                 ->collect()
-                ->map(fn ($source, $id) => when(
-                    $source instanceof Source,
-                    $source->validate($this),
-                    "Source must be a \LsvEu\Rivers\Cartography\Source object",
+                ->map(fn ($launch, $id) => when(
+                    $launch instanceof Launch,
+                    $launch->validate($this),
+                    "Launch must be a \LsvEu\Rivers\Cartography\Launch object",
                 ))
                 ->filter(),
         ])

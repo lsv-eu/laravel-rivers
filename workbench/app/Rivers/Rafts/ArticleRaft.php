@@ -30,7 +30,7 @@ class ArticleRaft extends ModelRaft
     {
         return match ($name) {
             'article' => new static(['modelId' => $this->modelId]),
-            'author' => new UserRaft(['modelId' => $this->user_id]),
+            'author' => new UserRaft(['modelId' => $this->record->user_id]),
             default => null,
         };
     }

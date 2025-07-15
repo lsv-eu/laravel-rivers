@@ -4,9 +4,9 @@ namespace Tests\Feature;
 
 use LsvEu\Rivers\Cartography\Connection;
 use LsvEu\Rivers\Cartography\Fork;
+use LsvEu\Rivers\Cartography\Launches\ModelCreated;
 use LsvEu\Rivers\Cartography\Rapid;
 use LsvEu\Rivers\Cartography\RiverMap;
-use LsvEu\Rivers\Cartography\Source\ModelCreated;
 use LsvEu\Rivers\Models\River;
 use Tests\Feature\Classes\NameCondition;
 use Tests\Feature\Classes\PausingRipple;
@@ -47,7 +47,7 @@ it('should complete if the else is not connected', function () {
 function getRiver(bool $includeElse = true, bool $includeFirst = true): River
 {
     $connections = [
-        Connection::make('source-one', null, 'fork-on-name'),
+        Connection::make('launch-one', null, 'fork-on-name'),
         Connection::make('fork-on-name', 'condition-mary', 'rapid-mary'),
     ];
 
@@ -78,9 +78,9 @@ function getRiver(bool $includeElse = true, bool $includeFirst = true): River
                 new Rapid(['id' => 'rapid-mary', 'ripples' => [new PausingRipple]]),
                 new Rapid(['id' => 'rapid-other', 'ripples' => [new PausingRipple]]),
             ],
-            'sources' => [
+            'launches' => [
                 new ModelCreated([
-                    'id' => 'source-one',
+                    'id' => 'launch-one',
                     'class' => User::class,
                 ]),
             ],
