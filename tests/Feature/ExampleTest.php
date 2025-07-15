@@ -1,11 +1,14 @@
 <?php
 
-use LsvEu\Rivers\Cartography\RiverMap;
+use LsvEu\Rivers\Cartography\Launches\ModelCreated;
 use LsvEu\Rivers\Models\River;
 use Symfony\Component\Uid\Ulid;
+use Tests\Feature\Classes\BasicUserMap;
 use Tests\Traits\UsesConfig;
 use Workbench\App\Models\Tag;
+use Workbench\App\Models\Taggable;
 use Workbench\App\Models\User;
+use Workbench\App\Rivers\Rafts\UserRaft;
 
 uses(UsesConfig::class);
 
@@ -21,11 +24,12 @@ test('create_users', function () {
 });
 
 test('create_first_river', function () {
-    $map = new RiverMap([
+    $map = new BasicUserMap([
         'launches' => [
-            new \LsvEu\Rivers\Cartography\Launches\ModelCreated([
+            new ModelCreated([
                 'id' => Ulid::generate(),
-                'class' => \Workbench\App\Models\Taggable::class,
+                'class' => Taggable::class,
+                'raftClass' => UserRaft::class,
             ]),
         ],
     ]);

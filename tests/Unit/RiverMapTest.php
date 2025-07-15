@@ -10,12 +10,12 @@ use LsvEu\Rivers\Cartography\Rapid;
 use LsvEu\Rivers\Cartography\RiverElement;
 use LsvEu\Rivers\Cartography\RiverMap;
 use Workbench\App\Models\Article;
-use Workbench\App\Models\User;
 use Workbench\App\Rivers\Rafts\ArticleRaft;
-use Workbench\App\Rivers\Rafts\UserRaft;
 
 it('is valid with empty collections', function () {
-    $map = new RiverMap;
+    $map = new RiverMap([
+        'raftClass' => ArticleRaft::class,
+    ]);
 
     expect($map->isValid())->toBeTrue();
 });
@@ -26,16 +26,17 @@ it('is valid with valid collections', function () {
     $launch = new class extends Launch {};
 
     $map = new RiverMap([
+        'raftClass' => ArticleRaft::class,
         'connections' => [new Connection(['startId' => 'foo', 'endId' => 'bar'])],
         'forks' => [new $fork(['id' => 'foo'])],
+        'launches' => [new $launch(['raftClass' => ArticleRaft::class])],
         'rapids' => [new $rapid(['id' => 'bar'])],
-        'launches' => [new $launch],
     ]);
 
     expect($map->isValid())->toBeTrue();
 });
 
-it('is invalid with invalid collections', function () {
+it('should be invalid with collections containing incorrect types', function () {
     $badObject = new class extends RiverElement
     {
         public string $id = 'foo';
@@ -70,40 +71,30 @@ it('is invalid with invalid collections', function () {
         ->and($errors['launches']['foo'])->toBe('Launch must be a \LsvEu\Rivers\Cartography\Launch object');
 });
 
-it('should be invalid if the launches do not match the raft type', function () {
+it('should be invalid if a launch is invalid', function () {
     $map = new RiverMap([
-        'raftName' => 'article',
-        'raftType' => UserRaft::class,
-        'launches' => [new Launches\ModelCreated(['id' => 'launch-1', 'class' => Article::class])],
-    ]);
-
-    $errors = $map->validate();
-    expect($map->isValid())->toBeFalse()
-        ->and($errors)->toContain('launches')
-        ->and($errors['launches'])->toContain('Launch does not provide a compatible raft type.');
-})->skip();
-
-it('should be invalid if any launch does not match the raft type', function () {
-    $map = new RiverMap([
-        'raftName' => 'article',
-        'raftType' => ArticleRaft::class,
+        'raftClass' => ArticleRaft::class,
         'launches' => [
-            new Launches\ModelCreated(['id' => 'launch-1', 'class' => Article::class]),
-            new Launches\ModelCreated(['id' => 'launch-2', 'class' => User::class]),
+            new Launches\ModelCreated([
+                'id' => 'launch-1',
+                'class' => Article::class,
+            ]),
         ],
     ]);
 
     $errors = $map->validate();
     expect($map->isValid())->toBeFalse()
-        ->and($errors)->toContain('launches')
-        ->and($errors['launches'])->toContain('Launch does not provide a compatible raft type.');
-})->skip();
+        ->and($errors)->toHaveKey('launches')
+        ->and($errors['launches'])->toHaveKey('launch-1');
+});
 
-it('should be valid if all launches provide the raft type', function () {
+it('should be valid if all launches are valid', function () {
     $map = new RiverMap([
-        'raftName' => 'article',
-        'raftType' => ArticleRaft::class,
-        'launches' => [new Launches\ModelCreated(['id' => 'launch-1', 'class' => Article::class])],
+        'raftClass' => ArticleRaft::class,
+        'launches' => [
+            new Launches\ModelCreated(['class' => Article::class, 'raftClass' => ArticleRaft::class]),
+            new Launches\ModelCreated(['class' => Article::class, 'raftClass' => ArticleRaft::class]),
+        ],
     ]);
 
     expect($map->isValid())->toBeTrue();

@@ -2,15 +2,15 @@
 
 namespace Tests\Unit;
 
-use LsvEu\Rivers\Cartography\RiverMap;
 use LsvEu\Rivers\Models\River;
 use LsvEu\Rivers\Models\RiverRun;
+use Tests\Feature\Classes\TestRaftMap;
 use Tests\Unit\Classes\TestRaft;
 
 it('should store rafts', function () {
     $river = River::create([
         'title' => 'Test',
-        'map' => new RiverMap,
+        'map' => new TestRaftMap,
     ]);
 
     RiverRun::create([
@@ -25,7 +25,7 @@ it('should store rafts', function () {
 it('should store sweeps', function () {
     $river = River::create([
         'title' => 'Test',
-        'map' => new RiverMap,
+        'map' => new TestRaftMap,
     ]);
 
     RiverRun::create([

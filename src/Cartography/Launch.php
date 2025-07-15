@@ -17,6 +17,8 @@ abstract class Launch extends RiverElement
 
     public bool $enabled;
 
+    public ?string $raftClass;
+
     public bool $restartable = false;
 
     public function __construct(array $attributes = [])
@@ -26,6 +28,8 @@ abstract class Launch extends RiverElement
         $this->conditions = RiverElementCollection::make($attributes['conditions'] ?? []);
 
         $this->enabled = $attributes['enabled'] ?? false;
+
+        $this->raftClass = $attributes['raftClass'] ?? null;
 
         $this->restartable = $attributes['restartable'] ?? false;
     }
@@ -65,6 +69,13 @@ abstract class Launch extends RiverElement
 
     public function validate(RiverMap $map): ?array
     {
-        return null;
+        $errors = [];
+        if ($this->raftClass === null) {
+            $errors['raftClass'] = 'A raft class must be provided.';
+        } elseif ($this->raftClass != $map->raftClass) {
+            $errors['raftClass'] = 'The raft class provided does not match the map raft class.';
+        }
+
+        return empty($errors) ? null : $errors;
     }
 }

@@ -2,7 +2,11 @@
 
 use LsvEu\Rivers\Cartography\Condition;
 use LsvEu\Rivers\Cartography\Launch;
+use LsvEu\Rivers\Cartography\RiverMap;
 use LsvEu\Rivers\Models\RiverRun;
+use Tests\Unit\Classes\EmptyLaunch;
+use Tests\Unit\Classes\EmptyRaft;
+use Tests\Unit\Classes\TestRaft;
 use Workbench\App\Models\User;
 use Workbench\App\Rivers\Rafts\UserRaft;
 
@@ -70,4 +74,31 @@ test('launch with multiple conditions tests correctly', function () {
 
     expect($launch->check($runBad))->toBeFalse()
         ->and($launch->check($runGood))->toBeTrue();
+});
+
+it('should be invalid if not raft class is provided', function () {
+    $map = new RiverMap([
+        'raftClass' => EmptyRaft::class,
+    ]);
+
+    $launch = new EmptyLaunch;
+
+    $errors = $launch->validate($map);
+    expect($errors)->toBeArray()->toHaveKey('raftClass')
+        ->and($errors['raftClass'])->toBe('A raft class must be provided.');
+});
+
+it('should be invalid if the launches do not match the raft type', function () {
+
+    $map = new RiverMap([
+        'raftClass' => TestRaft::class,
+    ]);
+
+    $launch = new EmptyLaunch([
+        'raftClass' => EmptyRaft::class,
+    ]);
+
+    $errors = $launch->validate($map);
+    expect($errors)->toBeArray()->toHaveKey('raftClass')
+        ->and($errors['raftClass'])->toBe('The raft class provided does not match the map raft class.');
 });

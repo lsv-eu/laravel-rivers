@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Event;
+use LsvEu\Rivers\Cartography\Launch;
 use LsvEu\Rivers\Cartography\RiverMap;
 use LsvEu\Rivers\Contracts\Raft;
 use LsvEu\Rivers\Events\RiverPausedEvent;

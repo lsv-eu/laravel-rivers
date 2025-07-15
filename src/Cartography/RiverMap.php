@@ -39,6 +39,8 @@ class RiverMap implements \JsonSerializable, Arrayable, CastsAttributes
      */
     public RiverElementCollection $launches;
 
+    public ?string $raftClass;
+
     public function __construct(array $attributes = [])
     {
         $this->bridges = RiverElementCollection::make($attributes['bridges'] ?? [], Bridge::class);
@@ -48,6 +50,7 @@ class RiverMap implements \JsonSerializable, Arrayable, CastsAttributes
         $this->launches = RiverElementCollection::make($attributes['launches'] ?? [], Launch::class);
 
         $this->repeatable = false;
+        $this->raftClass = $attributes['raftClass'] ?? null;
     }
 
     public function getElementById(string $id): ?RiverElement
@@ -167,6 +170,23 @@ class RiverMap implements \JsonSerializable, Arrayable, CastsAttributes
                 ->filter(),
         ])
             ->filter(fn (Collection $set) => $set->isNotEmpty())
+            ->put('raftClass', $this->validateRaft())
+            ->filter()
             ->toArray();
+    }
+
+    protected function validateRaft(): ?string
+    {
+        if ($this->raftClass === null) {
+            return 'A raft class must be provided.';
+        }
+        if (! class_exists($this->raftClass)) {
+            return "The raft class {$this->raftClass} does not exist.";
+        }
+        if (! is_subclass_of($this->raftClass, Raft::class)) {
+            return "The raft {$this->raftClass} must be a subclass of \LsvEu\Rivers\Contracts\Raft.";
+        }
+
+        return null;
     }
 }

@@ -5,21 +5,21 @@ namespace Tests\Feature;
 use Illuminate\Events\CallQueuedListener;
 use LsvEu\Rivers\Cartography\Bridges\TimeDelayBridge;
 use LsvEu\Rivers\Cartography\Connection;
-use LsvEu\Rivers\Cartography\Launches\ModelCreated;
 use LsvEu\Rivers\Cartography\Rapid;
-use LsvEu\Rivers\Cartography\RiverMap;
 use LsvEu\Rivers\Listeners\PauseRiverTimedBridges;
 use LsvEu\Rivers\Listeners\ResumeRiverTimedBridges;
 use LsvEu\Rivers\Models\River;
 use Queue;
+use Tests\Feature\Classes\BasicUserMap;
 use Tests\Feature\Classes\PausingRipple;
 use Workbench\App\Models\User;
+use Workbench\App\Rivers\Launches\UserCreated;
 
 it('should not queue listeners when disabled', function () {
     config()->set('rivers.use_timed_bridges', false);
     Queue::fake();
 
-    $river = River::create(['title' => 'Test River', 'map' => new RiverMap]);
+    $river = River::create(['title' => 'Test River', 'map' => new BasicUserMap]);
     $river->pause();
     $river->resume();
 
@@ -31,7 +31,7 @@ it('should queue listeners when enabled and handle pausing', function () {
     config()->set('rivers.use_timed_bridges', true);
     Queue::fake();
 
-    $river = River::create(['title' => 'Test River', 'map' => new RiverMap, 'status' => 'active']);
+    $river = River::create(['title' => 'Test River', 'map' => new BasicUserMap, 'status' => 'active']);
     Queue::assertNotPushed(CallQueuedListener::class, fn ($listener) => $listener->class === PauseRiverTimedBridges::class);
     Queue::assertNotPushed(CallQueuedListener::class, fn ($listener) => $listener->class === ResumeRiverTimedBridges::class);
 
@@ -47,8 +47,8 @@ it('should queue listeners when enabled and handle pausing', function () {
 });
 
 it('should resume processing', function () {
-    $map = new RiverMap([
-        'launches' => [new ModelCreated(['id' => 'user-created', 'class' => User::class])],
+    $map = new BasicUserMap([
+        'launches' => [new UserCreated(['id' => 'user-created'])],
         'bridges' => [new TimeDelayBridge(['id' => 'time-bridge', 'duration' => 'P1D'])],
         'rapids' => [new Rapid(['id' => 'pause-rapid', 'ripples' => [new PausingRipple]])],
         'connections' => [

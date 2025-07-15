@@ -47,7 +47,7 @@ it('should not provide sweeps', function () {
 it('should not provide additional rafts as defined by main raft', function () {
     $river = River::create([
         'title' => 'Test',
-        'map' => new RiverMap,
+        'map' => new RiverMap(['raftClass' => ArticleRaft::class]),
     ]);
 
     $article = Article::factory()->create();
@@ -70,7 +70,7 @@ function createRun(): array
 {
     $river = River::create([
         'title' => 'Test',
-        'map' => new RiverMap,
+        'map' => new RiverMap(['raftClass' => TestRaft::class]),
     ]);
 
     $run = RiverRun::create([

@@ -1,13 +1,13 @@
 <?php
 
 use Illuminate\Support\Facades\Queue;
-use LsvEu\Rivers\Cartography\Launches\ModelCreated;
-use LsvEu\Rivers\Cartography\RiverMap;
 use LsvEu\Rivers\Jobs\ProcessRiverRun;
 use LsvEu\Rivers\Models\River;
 use LsvEu\Rivers\Models\RiverRun;
+use Tests\Feature\Classes\BasicUserMap;
 use Tests\Traits\UsesConfig;
 use Workbench\App\Models\User;
+use Workbench\App\Rivers\Launches\UserCreated;
 
 uses(UsesConfig::class);
 
@@ -72,13 +72,8 @@ function createUserListeningRiver(string $status = 'active'): River
     return River::create([
         'title' => 'Queue Test',
         'status' => $status,
-        'map' => new RiverMap([
-            'launches' => [
-                new ModelCreated([
-                    'id' => 'user1',
-                    'class' => User::class,
-                ]),
-            ],
+        'map' => new BasicUserMap([
+            'launches' => [new UserCreated],
         ]),
     ]);
 }
