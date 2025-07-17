@@ -2,13 +2,11 @@
 
 namespace LsvEu\Rivers\Cartography\Launches;
 
-use LsvEu\Rivers\Contracts\Raft;
-
 class ModelUpdated extends ModelCreated
 {
-    public function getInterruptListener(Raft $raft): ?string
+    public function getInterruptListener(): ?string
     {
-        return "model.updated.$this->class.".$raft->toArray()['modelId'];
+        return $this->class::createRiverRunListener('updated');
     }
 
     public function getStartListener(): ?string

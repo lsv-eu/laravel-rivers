@@ -3,7 +3,7 @@
 namespace LsvEu\Rivers\Cartography;
 
 use LsvEu\Rivers\Actions\EvaluateRiverElement;
-use LsvEu\Rivers\Contracts\Raft;
+use LsvEu\Rivers\Models\River;
 use LsvEu\Rivers\Models\RiverRun;
 
 abstract class Launch extends RiverElement
@@ -34,10 +34,13 @@ abstract class Launch extends RiverElement
         $this->restartable = $attributes['restartable'] ?? false;
     }
 
-    public function check(RiverRun $run): bool
+    public function check(River|RiverRun $river, array $additionalData = []): bool
     {
+        // Create a reusable evaluator so we aren't rebuilding dependency inject for each check
+        $evaluator = new EvaluateRiverElement($river, $additionalData);
+
         return $this->conditions->reduce(
-            callback: fn (bool $carry, Condition $condition) => $carry && EvaluateRiverElement::run($run, $condition),
+            callback: fn (bool $carry, Condition $condition) => $carry && $evaluator->handle($condition),
             initial: true,
         );
     }
@@ -47,7 +50,7 @@ abstract class Launch extends RiverElement
         return [];
     }
 
-    public function getInterruptListener(Raft $raft): ?string
+    public function getInterruptListener(): ?string
     {
         return null;
     }

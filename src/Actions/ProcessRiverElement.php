@@ -7,15 +7,15 @@ use LsvEu\Rivers\Models\RiverRun;
 
 class ProcessRiverElement
 {
-    public function __construct(protected RiverRun $run) {}
+    public function __construct(protected RiverRun $run, protected array $additionalData = []) {}
 
-    public static function run(RiverRun $run, RiverElement $element, string $method = 'process'): void
+    public static function run(RiverRun $run, RiverElement $element, string $method = 'process', array $additionalData = []): void
     {
-        (new static($run))->handle($element, $method);
+        (new static($run, $additionalData))->handle($element, $method);
     }
 
-    public function handle(RiverElement $element, string $method = 'evaluate'): void
+    public function handle(RiverElement $element, string $method = 'process'): void
     {
-        EvaluateRiverElement::run($this->run, $element, $method);
+        EvaluateRiverElement::run($this->run, $element, $method, $this->additionalData);
     }
 }

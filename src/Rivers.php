@@ -2,7 +2,8 @@
 
 namespace LsvEu\Rivers;
 
-use LsvEu\Rivers\Contracts\CreatesRaft;
+use Illuminate\Support\Facades\Config;
+use LsvEu\Rivers\Contracts\Raft;
 use LsvEu\Rivers\Models\HasObservers;
 use LsvEu\Rivers\Models\River;
 use LsvEu\Rivers\Models\RiverRun;
@@ -16,42 +17,58 @@ class Rivers
         $this->loadObservers();
     }
 
-    public function trigger(string $event, CreatesRaft $model, bool $eventHasId = false): void
+    public function trigger(string $event, Raft $raft, array $eventData = []): void
     {
-        if ($eventHasId) {
-            RiverRun::query()
-                ->hasListener($event)
-                ->chunk(100, function ($runs) use ($model, $event) {
-                    foreach ($runs as $run) {
-                        $run->riverInterrupts()->create([
-                            'event' => $event,
-                            'details' => $model->createRaft(),
-                        ]);
-                    }
-                });
-        }
-
-        $startEvent = $event;
         River::query()
-            ->hasListener($startEvent)
+            ->hasListener($event)
             ->active()
-            ->chunk(100, function ($rivers) use ($model, $startEvent, $eventHasId) {
-                foreach ($rivers as $river) {
-                    // TODO: Check if this needs re-thought because of source conditions
-                    if ($eventHasId) {
-                        $latestRun = $river->riverRuns()->latest()->first();
-                        // Don't start a new run if:
-                        //  - there is a current river-run
-                        //  - the river is not repeatable and has been run
-                        if ($latestRun?->location || ($latestRun && ! $river->map->repeatable)) {
-                            continue;
-                        }
+            ->each(function (River $river) use ($eventData, $raft, $event) {
+                if ($river->map->raftClass !== get_class($raft)) {
+                    return;
+                }
+
+                if ($river->repeatable) {
+                    $run = $river->riverRuns()
+                        ->whereRaftId($raft->id)
+                        ->whereNull('completed_at')
+                        ->first();
+                    if ($run === null) {
+                        $this->launch($river, $event, $raft);
+                    } else {
+                        $this->createInterrupt($run, $event, $eventData);
                     }
-                    $source = $river->map->getSourceByStartListener($startEvent);
-                    if ($source->check(new RiverRun(['river' => $river, 'raft' => $model->createRaft()]))) {
-                        $river->startRun($startEvent, $model, $source);
+                } else {
+                    $run = $river->riverRuns()->whereRaftId($raft->id)->first();
+                    if ($run === null) {
+                        $this->launch($river, $event, $raft);
+                    } elseif ($run->completed_at === null) {
+                        $this->createInterrupt($run, $event, $eventData);
                     }
                 }
             });
+    }
+
+    protected function createInterrupt(RiverRun $run, string $event, array $eventData = []): void
+    {
+        $launch = $run->river->map->getLaunchByInterruptListener($run, $event, ['eventData' => $eventData]);
+        if ($launch) {
+            $run->riverInterrupts()->create([
+                'event' => $event,
+                'details' => $eventData,
+            ]);
+
+            if ($run->status === 'bridge') {
+                Config::get('rivers.job_class')::dispatch($run->id);
+            }
+        }
+    }
+
+    protected function launch(River $river, string $event, Raft $raft, array $eventData = []): void
+    {
+        $launch = $river->map->getLaunchByStartListener($river, $event, ['raft' => $raft, 'eventData' => $eventData]);
+
+        if ($launch) {
+            $river->startRun($launch, $raft);
+        }
     }
 }

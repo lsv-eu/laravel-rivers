@@ -55,6 +55,7 @@ test('job should complete without processing if paused', function () {
     $riverRun = $river->riverRuns()->create([
         'location' => 'user1',
         'raft' => $user->createRaft(),
+        'raft_id' => $user->id,
     ]);
     $job = (new ProcessRiverRun($riverRun->id))->withFakeQueueInteractions();
     $job->handle();

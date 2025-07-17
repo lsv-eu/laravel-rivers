@@ -3,7 +3,9 @@
 use LsvEu\Rivers\Cartography\Condition;
 use LsvEu\Rivers\Cartography\Launch;
 use LsvEu\Rivers\Cartography\RiverMap;
+use LsvEu\Rivers\Models\River;
 use LsvEu\Rivers\Models\RiverRun;
+use Tests\Feature\Classes\BasicUserMap;
 use Tests\Unit\Classes\EmptyLaunch;
 use Tests\Unit\Classes\EmptyRaft;
 use Tests\Unit\Classes\TestRaft;
@@ -13,7 +15,12 @@ use Workbench\App\Rivers\Rafts\UserRaft;
 test('launch without conditions tests true', function () {
     $launch = new class extends Launch {};
     $user = User::factory()->create();
-    $run = new RiverRun(['raft' => $user->createRaft()]);
+    $river = new River([
+        'title' => 'Test River',
+        'status' => 'active',
+        'map' => new BasicUserMap,
+    ]);
+    $run = new RiverRun(['river' => $river, 'raft' => $user->createRaft()]);
 
     expect($launch->check($run))->toBeTrue();
 });
@@ -35,8 +42,14 @@ test('launch with a condition tests correctly', function () {
     $userBad = User::factory()->create(['name' => 'Bad']);
     $userGood = User::factory()->create(['name' => 'Good']);
 
-    $runBad = new RiverRun(['raft' => $userBad->createRaft()]);
-    $runGood = new RiverRun(['raft' => $userGood->createRaft()]);
+    $river = new River([
+        'title' => 'Test River',
+        'status' => 'active',
+        'map' => new BasicUserMap,
+    ]);
+
+    $runBad = new RiverRun(['river' => $river, 'raft' => $userBad->createRaft()]);
+    $runGood = new RiverRun(['river' => $river, 'raft' => $userGood->createRaft()]);
 
     expect($launch->check($runBad))->toBeFalse()
         ->and($launch->check($runGood))->toBeTrue();
@@ -69,8 +82,14 @@ test('launch with multiple conditions tests correctly', function () {
     $userBad = User::factory()->create(['name' => 'Good', 'email' => 'bad@example.com']);
     $userGood = User::factory()->create(['name' => 'Good', 'email' => 'good@example.com']);
 
-    $runBad = new RiverRun(['raft' => $userBad->createRaft()]);
-    $runGood = new RiverRun(['raft' => $userGood->createRaft()]);
+    $river = new River([
+        'title' => 'Test River',
+        'status' => 'active',
+        'map' => new BasicUserMap,
+    ]);
+
+    $runBad = new RiverRun(['river' => $river, 'raft' => $userBad->createRaft()]);
+    $runGood = new RiverRun(['river' => $river, 'raft' => $userGood->createRaft()]);
 
     expect($launch->check($runBad))->toBeFalse()
         ->and($launch->check($runGood))->toBeTrue();

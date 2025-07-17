@@ -33,8 +33,8 @@ class RiverRun extends Model
     {
         parent::boot();
 
-        static::saving(function (RiverRun $run) {
-            $run->listeners = array_values($run->river->map->getInterruptListenerEvents($run->raft));
+        static::creating(function (RiverRun $run) {
+            $run->raft_id = $run->raft->id;
         });
     }
 

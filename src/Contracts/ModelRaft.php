@@ -6,6 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 abstract class ModelRaft extends Raft
 {
+    /**
+     * @var class-string<Model>
+     */
     protected static string $modelClass;
 
     protected Model $record;
@@ -30,6 +33,11 @@ abstract class ModelRaft extends Raft
             $this->getRaftName() => new static(['modelId' => $this->modelId]),
             default => null,
         };
+    }
+
+    public function createRaftId($data): string
+    {
+        return $data['modelId'];
     }
 
     public function toArray(): array

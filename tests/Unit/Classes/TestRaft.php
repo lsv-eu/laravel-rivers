@@ -11,6 +11,11 @@ class TestRaft extends AttributeRaft
         'upper_name' => 'string',
     ];
 
+    public function createRaftId(array $data): string
+    {
+        return str($data['name'])->slug();
+    }
+
     protected function propertyUpperName(): string
     {
         return str($this->getRawProperty('name'))->upper();

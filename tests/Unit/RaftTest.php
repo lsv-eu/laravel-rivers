@@ -5,11 +5,11 @@ namespace Tests\Unit;
 use Tests\Unit\Classes\TestRaft;
 
 test('can get property types', function () {
-    expect((new TestRaft([]))->getPropertyType())->toEqual(['name' => 'string', 'upper_name' => 'string']);
+    expect((new TestRaft(['name' => 'test']))->getPropertyType())->toEqual(['name' => 'string', 'upper_name' => 'string']);
 });
 
 test('can get a property\'s type', function () {
-    expect((new TestRaft([]))->getPropertyType('name'))->toEqual('string');
+    expect((new TestRaft(['name' => 'test']))->getPropertyType('name'))->toEqual('string');
 });
 
 test('bad dynamic property throws error', function () {

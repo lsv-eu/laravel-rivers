@@ -31,8 +31,11 @@ class Fork extends RiverElement
      */
     public function getNext(RiverRun $run): string
     {
+        // Create a reusable evaluator so we aren't rebuilding dependency inject for each check
+        $evaluator = new EvaluateRiverElement($run);
+
         return $this->conditions
-            ->first(fn (Condition $condition) => EvaluateRiverElement::run($run, $condition))
+            ->first(fn (Condition $condition) => $evaluator->handle($condition))
             ?->id ?? $this->id;
     }
 

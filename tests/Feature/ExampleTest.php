@@ -24,26 +24,28 @@ test('create_users', function () {
 });
 
 test('create_first_river', function () {
+    $tag = Tag::create(['name' => 'Test',  'type' => 'user']);
+
     $map = new BasicUserMap([
         'launches' => [
             new ModelCreated([
                 'id' => Ulid::generate(),
                 'class' => Taggable::class,
+                'eventId' => $tag->id,
                 'raftClass' => UserRaft::class,
             ]),
         ],
     ]);
+
     $river = River::create([
         'title' => 'First River',
         'status' => 'active',
         'map' => $map,
     ]);
-
-    $tag = Tag::create(['name' => 'Test',  'type' => 'user']);
     $user = User::factory()->createOne(['name' => 'John']);
     $user->tags()->attach($tag);
-    expect($river->riverRuns)->toHaveCount(1);
-    expect($river->riverRuns->first()->raft->name)->toBe('John');
+    expect($river->riverRuns)->toHaveCount(1)
+        ->and($river->riverRuns->first()->raft->name)->toBe('John');
 });
 
 test('mock app tag events', function () {});

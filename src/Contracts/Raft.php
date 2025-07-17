@@ -9,9 +9,14 @@ abstract class Raft
 {
     use ProvidesInjections;
 
+    public readonly string $id;
+
     protected array $properties;
 
-    public function __construct(array $data) {}
+    public function __construct(array $data)
+    {
+        $this->id = $this->createRaftId($data);
+    }
 
     final public function __get(string $name)
     {
@@ -30,7 +35,7 @@ abstract class Raft
         ]);
     }
 
-    public static function hydrate(string $data): self
+    final public static function hydrate(string $data): self
     {
         $parts = json_decode($data, true);
 
@@ -54,6 +59,8 @@ abstract class Raft
     }
 
     abstract protected function getRawProperty($key): mixed;
+
+    abstract protected function createRaftId(array $data): string;
 
     public function getPropertyType(?string $key = null): array|null|string
     {

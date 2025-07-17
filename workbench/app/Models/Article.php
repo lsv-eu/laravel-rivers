@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use LsvEu\Rivers\Concerns\RiverRunnable;
 use LsvEu\Rivers\Contracts\CreatesRaft;
 use LsvEu\Rivers\Contracts\Raft;
 use LsvEu\Rivers\Observers\RiversObserver;
@@ -16,7 +17,7 @@ use Workbench\Database\Factories\ArticleFactory;
 #[ObservedBy(RiversObserver::class)]
 class Article extends Model implements CreatesRaft
 {
-    use HasFactory;
+    use HasFactory, RiverRunnable;
 
     public function tags(): morphToMany
     {

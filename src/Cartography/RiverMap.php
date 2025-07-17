@@ -7,6 +7,8 @@ use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Support\Collection;
 use LsvEu\Rivers\Cartography\Traits\SerializesData;
 use LsvEu\Rivers\Contracts\Raft;
+use LsvEu\Rivers\Models\River;
+use LsvEu\Rivers\Models\RiverRun;
 
 class RiverMap implements \JsonSerializable, Arrayable, CastsAttributes
 {
@@ -49,8 +51,8 @@ class RiverMap implements \JsonSerializable, Arrayable, CastsAttributes
         $this->rapids = RiverElementCollection::make($attributes['rapids'] ?? [], Rapid::class);
         $this->launches = RiverElementCollection::make($attributes['launches'] ?? [], Launch::class);
 
-        $this->repeatable = false;
         $this->raftClass = $attributes['raftClass'] ?? null;
+        $this->repeatable = $attributes['repeatable'] ?? false;
     }
 
     public function getElementById(string $id): ?RiverElement
@@ -71,44 +73,45 @@ class RiverMap implements \JsonSerializable, Arrayable, CastsAttributes
             ->keyBy('id');
     }
 
-    public function getInterruptListenerEvents(Raft $raft): array
-    {
-        return $this->getInterruptListeners($raft)->keys()->all();
-    }
-
-    /**
-     * @return Collection<string, Launch>
-     */
-    public function getInterruptListeners(Raft $raft): Collection
+    public function getInterruptListenerEvents(): array
     {
         return $this->launches
-            ->mapWithKeys(fn (Launch $launch) => [$launch->getInterruptListener($raft) => $launch])
-            ->filter();
+            ->map(fn (Launch $launch) => $launch->getInterruptListener())
+            ->filter()
+            ->unique()
+            ->values()
+            ->collect()
+            ->toArray();
     }
 
-    public function getLaunchByInterruptListener(string $event, Raft $raft): ?Launch
+    public function getLaunchByInterruptListener(RiverRun $river, string $event, array $additionalData): ?Launch
     {
-        return $this->getInterruptListeners($raft)->get($event);
+        return $this->launches
+            ->filter(fn (Launch $launch) => $launch->getInterruptListener() == $event)
+            ->first(fn (Launch $launch) => $launch->check($river, $additionalData));
     }
 
-    public function getLaunchByStartListener(string $event): ?Launch
+    public function getLaunchByStartListener(River|RiverRun $river, string $event, array $additionalData = []): ?Launch
     {
-        return $this->getStartListeners()->get($event);
+        return $this->launches
+            ->filter(fn (Launch $launch) => $launch->getStartListener() == $event)
+            ->first(fn (Launch $launch) => $launch->check($river, $additionalData));
+    }
+
+    public function getListenerEvents(): array
+    {
+        return array_merge($this->getStartListenerEvents(), $this->getInterruptListenerEvents());
     }
 
     public function getStartListenerEvents(): array
     {
-        return $this->getStartListeners()->keys()->all();
-    }
-
-    /**
-     * @return Collection<string, Launch>
-     */
-    public function getStartListeners(): Collection
-    {
         return $this->launches
-            ->mapWithKeys(fn (Launch $launch) => [$launch->getStartListener() => $launch])
-            ->filter();
+            ->map(fn (Launch $launch) => $launch->getStartListener())
+            ->filter()
+            ->unique()
+            ->values()
+            ->collect()
+            ->toArray();
     }
 
     public function isValid(): bool
@@ -124,6 +127,7 @@ class RiverMap implements \JsonSerializable, Arrayable, CastsAttributes
             'connections' => $this->connections->toArray(),
             'forks' => $this->forks->toArray(),
             'bridges' => $this->bridges->toArray(),
+            'raftClass' => $this->raftClass,
             'repeatable' => $this->repeatable,
         ];
     }

@@ -40,7 +40,8 @@ class River extends Model
         });
 
         static::saving(function (River $river) {
-            $river->listeners = $river->status == 'active' ? array_values($river->map->getStartListeners()) : [];
+            $river->listeners = $river->status == 'active' ? array_values($river->map->getListenerEvents()) : [];
+            $river->repeatable = $river->map->repeatable;
         });
 
         static::updated(function (River $river) {
@@ -107,7 +108,7 @@ class River extends Model
         $this->save();
     }
 
-    public function startRun(string $event, Raft $raft, Launch $launch): void
+    public function startRun(Launch $launch, Raft $raft): void
     {
         if (! $this->isPaused()) {
             $run = $this->riverRuns()->create([

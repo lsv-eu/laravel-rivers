@@ -16,6 +16,7 @@ class CreateRiverTables extends Migration
             $table->string('title');
             $table->string('status')->default('draft');
             $table->foreignIdFor(RiverVersion::class, 'current_version_id')->nullable();
+            $table->boolean('repeatable')->index();
             $table->longText('map');
             $table->longText('listeners');
             $table->timestamps();
@@ -33,9 +34,9 @@ class CreateRiverTables extends Migration
         Schema::create('river_runs', function (Blueprint $table) {
             $table->ulid('id')->primary();
             $table->foreignIdFor(River::class)->constrained()->cascadeOnDelete();
+            $table->string('raft_id')->index();
             $table->string('status')->default('created');
             $table->string('location')->nullable();
-            $table->longText('listeners');
             $table->longText('raft');
             $table->longText('sweeps')->default('[]');
             $table->timestamps();
@@ -46,7 +47,6 @@ class CreateRiverTables extends Migration
             $table->ulid('id')->primary();
             $table->foreignIdFor(RiverRun::class)->constrained()->cascadeOnDelete();
             $table->string('event');
-            $table->boolean('checked')->default(false);
             $table->longText('details');
             $table->timestamps();
         });

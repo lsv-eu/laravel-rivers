@@ -6,13 +6,17 @@ use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphPivot;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use LsvEu\Rivers\Concerns\RiverRunnable;
 use LsvEu\Rivers\Contracts\CreatesRaft;
+use LsvEu\Rivers\Contracts\ProvidesRiverEventId;
 use LsvEu\Rivers\Contracts\Raft;
 use LsvEu\Rivers\Observers\RiversObserver;
 
 #[ObservedBy(RiversObserver::class)]
-class Taggable extends MorphPivot implements CreatesRaft
+class Taggable extends MorphPivot implements CreatesRaft, ProvidesRiverEventId
 {
+    use RiverRunnable;
+
     public function tag(): BelongsTo
     {
         return $this->belongsTo(Tag::class);
@@ -30,5 +34,10 @@ class Taggable extends MorphPivot implements CreatesRaft
         }
 
         return null;
+    }
+
+    public function getRiverEventId(): string
+    {
+        return $this->tag_id;
     }
 }

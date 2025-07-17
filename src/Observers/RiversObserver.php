@@ -2,33 +2,43 @@
 
 namespace LsvEu\Rivers\Observers;
 
+use Illuminate\Database\Eloquent\Model;
 use LsvEu\Rivers\Contracts\CreatesRaft;
+use LsvEu\Rivers\Contracts\ProvidesRiverEventId;
 use LsvEu\Rivers\Facades\Rivers;
 
 class RiversObserver
 {
-    public function created(CreatesRaft $model): void
+    public function created(CreatesRaft|Model $model): void
     {
-        $this->handle($model, 'created', false);
-    }
-
-    public function deleted(CreatesRaft $model): void
-    {
-        $this->handle($model, 'deleted', true);
-    }
-
-    public function updated(CreatesRaft $model): void
-    {
-        $this->handle($model, 'updated', true);
-    }
-
-    protected function handle(CreatesRaft $model, string $event, bool $eventHasId): void
-    {
-        $listener = "model.$event.".get_class($model);
-        if ($eventHasId) {
-            $listener .= ".{$model->getKey()}";
+        if ($raft = $model->createRaft()) {
+            Rivers::trigger($this->createListener($model, 'created'), $raft);
         }
+    }
 
-        Rivers::trigger($listener, $model, $eventHasId);
+    public function deleted(CreatesRaft|Model $model): void
+    {
+        if ($raft = $model->createRaft()) {
+            Rivers::trigger($this->createListener($model, 'created'), $raft);
+        }
+    }
+
+    public function updated(CreatesRaft|Model $model): void
+    {
+        if ($raft = $model->createRaft()) {
+            Rivers::trigger(
+                $this->createListener($model, 'updated'),
+                $raft,
+                $model->getChanges(),
+            );
+        }
+    }
+
+    protected function createListener(CreatesRaft $model, string $event): string
+    {
+        return $model::createRiverRunListener(
+            event: $event,
+            id: $model instanceof ProvidesRiverEventId ? $model->getRiverEventId() : null,
+        );
     }
 }

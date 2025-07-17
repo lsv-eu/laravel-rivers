@@ -9,6 +9,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Config;
 use LsvEu\Rivers\Actions\ProcessRiverElement;
 use LsvEu\Rivers\Cartography\Fork;
+use LsvEu\Rivers\Models\RiverInterrupt;
 use LsvEu\Rivers\Models\RiverRun;
 
 class ProcessRiverRun implements ShouldQueue
@@ -59,11 +60,6 @@ class ProcessRiverRun implements ShouldQueue
             return;
         }
 
-        // Check if there is a new interrupt
-        if ($this->handleInterrupt($run)) {
-            return;
-        }
-
         if ($run->river->isPaused()) {
             $this->delete();
             $run->update(['status' => 'paused']);
@@ -72,6 +68,13 @@ class ProcessRiverRun implements ShouldQueue
         }
 
         $run->update(['status' => 'running']);
+
+        // Check if there is a new interrupt
+        if ($this->handleInterrupt($run)) {
+            static::dispatch($run->id);
+
+            return;
+        }
 
         $connection = $run->river->map->connections->firstWhere('startId', $run->location);
 
@@ -122,27 +125,19 @@ class ProcessRiverRun implements ShouldQueue
 
     protected function handleInterrupt(RiverRun $run): bool
     {
-        if ($run->completed_at && ! $run->river->map->repeatable) {
-            $run->interrupts()->whereChecked(false)->latest()->update(['checked' => false]);
+        $interrupted = false;
 
-            return false;
-        }
-        $interrupts = $run->interrupts()->whereChecked(false)->latest()->get();
-        if ($interrupts->isNotEmpty()) {
-            foreach ($interrupts as $interrupt) {
-                // If completed and interrupt is a source, start a new run (repeatable already checked) and break
-                if ($interrupt) {
-                    // TODO: Start new run
-                    $run->interrupts()->whereChecked(false)->latest()->update(['checked' => false]);
-
-                    return true;
-                }
-                // Elseif not completed, set the location and break
+        $run->interrupts()->oldest()->each(function (RiverInterrupt $interrupt) use (&$interrupted, $run) {
+            $launch = $run->river->map->getLaunchByInterruptListener($run, $interrupt->event, $interrupt->details);
+            if ($launch) {
+                $interrupted = true;
+                $run->update(['location' => $launch->id]);
             }
 
-        }
+            $interrupt->delete();
+        });
 
-        return false;
+        return $interrupted;
     }
 
     protected function completeJob(RiverRun $run): void
