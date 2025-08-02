@@ -49,6 +49,4 @@ it('should resume run if bridged', function () {
         ->and($river->riverRuns->first()->location)->toBeNull();
 });
 
-it('should have more tests', function () {
-
-})->skip();
+it('should have more tests', function () {})->skip();

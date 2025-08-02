@@ -63,7 +63,7 @@ class Rivers
         }
     }
 
-    protected function launch(River $river, string $event, Raft $raft, array $eventData=[]): void
+    protected function launch(River $river, string $event, Raft $raft, array $eventData = []): void
     {
         $launch = $river->map->getLaunchByStartListener($river, $event, ['raft' => $raft, 'eventData' => $eventData]);
 
