@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Queue;
+use LsvEu\Rivers\Cartography;
 use LsvEu\Rivers\Jobs\ProcessRiverRun;
 use LsvEu\Rivers\Models\River;
 use LsvEu\Rivers\Models\RiverRun;
@@ -66,6 +67,32 @@ test('run should complete if no connections', function () {
     createUserListeningRiver();
     User::factory()->createOne();
     expect(RiverRun::first()->completed_at)->toBeObject();
+});
+
+test('job should dispatch a new job if needed', function () {
+    $river = River::create([
+        'title' => 'Queue Test',
+        'status' => 'active',
+        'map' => new BasicUserMap([
+            'launches' => [new UserCreated(['id' => 'user-created'])],
+            'rapids' => [
+                new Cartography\Rapid(['id' => 'rapid-one']),
+                new Cartography\Rapid(['id' => 'rapid-two']),
+            ],
+            'connections' => [
+                new Cartography\Connection(['startId' => 'user-created', 'endId' => 'rapid-one']),
+                new Cartography\Connection(['startId' => 'rapid-one', 'endId' => 'rapid-two']),
+            ],
+        ]),
+    ]);
+
+    $queue = Queue::fake();
+    User::factory()->create();
+
+    $queue->assertPushed(ProcessRiverRun::class, 1);
+    $queue->pushedJobs()[ProcessRiverRun::class][0]['job']->handle();
+    $queue->assertPushed(ProcessRiverRun::class, 2);
+
 });
 
 function createUserListeningRiver(string $status = 'active'): River

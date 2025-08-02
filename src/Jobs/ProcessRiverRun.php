@@ -117,7 +117,7 @@ class ProcessRiverRun implements ShouldQueue
         } elseif ($run->river->isPaused()) {
             $run->update(['status' => 'paused']);
         } else {
-            if (! $run->status == 'bridge') {
+            if ($run->status != 'bridge') {
                 static::dispatch($run->id);
             }
         }
