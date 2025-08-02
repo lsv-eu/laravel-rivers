@@ -4,10 +4,6 @@
  * You can place your custom package configuration in here.
  */
 return [
-    'database' => [
-        'prefix' => 'river_',
-    ],
-
     'queue' => env('RIVERS_QUEUE', 'default'),
 
     'job_class' => \LsvEu\Rivers\Jobs\ProcessRiverRun::class,
