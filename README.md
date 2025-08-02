@@ -1,11 +1,16 @@
-# Very short description of the package
+# Laravel Rivers
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/lsv-eu/laravel-rivers.svg?style=flat-square)](https://packagist.org/packages/lsv-eu/laravel-rivers)
 [![Total Downloads](https://img.shields.io/packagist/dt/lsv-eu/laravel-rivers.svg?style=flat-square)](https://packagist.org/packages/lsv-eu/laravel-rivers)
 ![GitHub Actions](https://github.com/lsv-eu/rivers/actions/workflows/main.yml/badge.svg)
 ![GitHub Actions](https://github.com/lsv-eu/rivers/actions/workflows/lint.yml/badge.svg)
 
-This is where your description should go. Try and limit it to a paragraph or two, and maybe throw in a mention of what PSRs you support to avoid any confusion with users and contributors.
+Laravel Rivers is a system to create and run user-definable, mutable rivers in Laravel. Rivers are similar to pipelines, automations, journeys, workflows, etc. For this reason, we have adopted [river-based language](https://github.com/lsv-eu/laravel-rivers/blob/main/docs/terminology.md) to, hopefully, decrease confusion.
+
+## Documentation
+
+- [Terminology](https://github.com/lsv-eu/laravel-rivers/blob/main/docs/terminology.md)
+- (In progress)
 
 ## Installation
 
@@ -16,10 +21,6 @@ composer require lsv-eu/rivers
 ```
 
 ## Usage
-
-```php
-// Usage description here
-```
 
 ### Testing
 
@@ -37,13 +38,13 @@ Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
 
 ### Security
 
-If you discover any security related issues, please email leo@leolutz.com instead of using the issue tracker.
+If you discover any security-related issues, please email leo.lutz@lsv.eu instead of using the issue tracker.
 
 ## Credits
 
 -   [Leo Lutz](https://github.com/skeemer)
 -   [Paul Riddick](https://github.com/paulriddickeu)
--   [All Contributors](../../contributors)
+-   [All Contributors](https://github.com/lsv-eu/laravel-rivers/contributors)
 
 ## License
 

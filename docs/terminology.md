@@ -1,8 +1,8 @@
 # Terminology
 
-Rivers uses a set of terms revolving around waterways, but avoids more common terms that tend to be overused and can
+Laravel Rivers uses a set of terms revolving around waterways, but avoids more common terms that tend to be overused and can
 mean many different things based on context or the whims of the implementor. The common terms automation, workflow,
-stream, pipeline, etcetera carry a lot of expectations and assumptions that cause a lot of confusion. 
+stream, pipeline, etc. carry a lot of expectations and assumptions that cause a lot of confusion. 
 
 **Note**: All terms in _italics_ indicate a defined term and not a general term. 
 
@@ -10,7 +10,7 @@ stream, pipeline, etcetera carry a lot of expectations and assumptions that caus
 The record that stores a _river map_.
 
 ### River Map
-A collection of _launches_, _rapids_, _forks_ and _bridges_ that are connected.
+A collection of _launches_, _rapids_, _forks_, and _bridges_ and the connections between them.
 
 ### Raft
 The thing that can travel down a _river_.
