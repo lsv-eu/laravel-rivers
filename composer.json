@@ -1,11 +1,11 @@
 {
-    "name": "lsv-eu/rivers",
-    "description": "Rivers is a system to create user-definable, mutable, workflows.",
+    "name": "lsv-eu/laravel-rivers",
+    "description": "Laravel Rivers is a system to create and run user-definable, mutable, workflows in Laravel.",
     "keywords": [
         "lsv-eu",
         "rivers"
     ],
-    "homepage": "https://github.com/lsv-eu/rivers",
+    "homepage": "https://github.com/lsv-eu/laravel-rivers",
     "license": "MIT",
     "type": "library",
     "authors": [
