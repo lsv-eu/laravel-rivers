@@ -20,6 +20,11 @@ You can install the package via composer:
 composer require lsv-eu/rivers
 ```
 
+(Optional) Install the config
+```shell
+php artisan vendor:public --tag=rivers-config
+```
+
 ## Usage
 
 ### Testing

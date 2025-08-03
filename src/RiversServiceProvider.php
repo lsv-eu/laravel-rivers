@@ -29,7 +29,7 @@ class RiversServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->publishes([
                 __DIR__.'/../config/config.php' => config_path('rivers.php'),
-            ], 'config');
+            ], 'rivers-config');
 
             // Publishing the views.
             /*$this->publishes([
