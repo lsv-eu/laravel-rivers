@@ -22,7 +22,7 @@ composer require lsv-eu/rivers
 
 (Optional) Install the config
 ```shell
-php artisan vendor:public --tag=rivers-config
+php artisan vendor:publish --tag=rivers-config
 ```
 
 ## Usage
