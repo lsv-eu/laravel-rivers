@@ -2,10 +2,10 @@
 
 namespace LsvEu\Rivers;
 
-use LsvEu\Rivers\Livewire\Synthesizers\MapSynthesizer;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Schedule;
 use Illuminate\Support\ServiceProvider;
+use LsvEu\Rivers\Livewire\Synthesizers\MapSynthesizer;
 
 class RiversServiceProvider extends ServiceProvider
 {
