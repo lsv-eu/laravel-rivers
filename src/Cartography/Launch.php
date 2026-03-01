@@ -66,6 +66,7 @@ abstract class Launch extends RiverElement
             'id' => $this->id,
             'conditions' => $this->conditions->toArray(),
             'enabled' => $this->enabled,
+            'raftClass' => $this->raftClass,
             'restartable' => $this->restartable,
         ];
     }

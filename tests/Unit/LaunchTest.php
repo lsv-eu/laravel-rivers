@@ -108,7 +108,6 @@ it('should be invalid if not raft class is provided', function () {
 });
 
 it('should be invalid if the launches do not match the raft type', function () {
-
     $map = new RiverMap([
         'raftClass' => TestRaft::class,
     ]);
@@ -120,4 +119,32 @@ it('should be invalid if the launches do not match the raft type', function () {
     $errors = $launch->validate($map);
     expect($errors)->toBeArray()->toHaveKey('raftClass')
         ->and($errors['raftClass'])->toBe('The raft class provided does not match the map raft class.');
+});
+
+it('should serialize base properties correctly', function () {
+    $launchClass = new class extends Launch {};
+    $condition = new class extends Condition
+    {
+        public function evaluate(?UserRaft $raft = null): bool
+        {
+            return $raft->name === 'Good';
+        }
+    };
+
+    $launch = new $launchClass([
+        'raftClass' => UserRaft::class,
+        'enabled' => true,
+        'restartable' => true,
+        'conditions' => [
+            $condition,
+        ],
+    ]);
+
+    expect($launch->toArray())->toBe([
+        'id' => $launch->id,
+        'conditions' => $launch->conditions->toArray(),
+        'enabled' => true,
+        'raftClass' => UserRaft::class,
+        'restartable' => true,
+    ]);
 });
