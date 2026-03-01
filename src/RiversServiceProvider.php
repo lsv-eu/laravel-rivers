@@ -2,6 +2,7 @@
 
 namespace LsvEu\Rivers;
 
+use LsvEu\Rivers\Livewire\Synthesizers\MapSynthesizer;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Schedule;
 use Illuminate\Support\ServiceProvider;
@@ -55,6 +56,10 @@ class RiversServiceProvider extends ServiceProvider
         // Register event listeners
         Event::listen(Events\RiverPausedEvent::class, Listeners\PauseRiverTimedBridges::class);
         Event::listen(Events\RiverResumedEvent::class, Listeners\ResumeRiverTimedBridges::class);
+
+        if (class_exists('\\Livewire\\Livewire')) {
+            \Livewire\Livewire::propertySynthesizer(MapSynthesizer::class);
+        }
     }
 
     /**
