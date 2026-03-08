@@ -15,6 +15,7 @@ test('create river with rapid', function () {
                 [Rapid::class, ['label' => 'First Rapid']],
             ],
         ]),
+        'status' => 'active',
     ]);
 
     $cleanMap = River::find($map->id);

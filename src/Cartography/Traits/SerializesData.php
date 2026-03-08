@@ -8,7 +8,9 @@ trait SerializesData
 {
     public function get(Model $model, string $key, mixed $value, array $attributes)
     {
-        return new static(json_decode($attributes[$key], true));
+        $decoded = json_decode($attributes[$key], true);
+
+        return $decoded === null ? null : new static($decoded);
     }
 
     public function set(Model $model, string $key, mixed $value, array $attributes)

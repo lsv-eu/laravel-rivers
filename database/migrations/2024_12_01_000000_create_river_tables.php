@@ -16,8 +16,9 @@ class CreateRiverTables extends Migration
             $table->string('title');
             $table->string('status')->default('draft');
             $table->foreignIdFor(RiverVersion::class, 'current_version_id')->nullable();
+            $table->foreignIdFor(RiverVersion::class, 'working_version_id')->nullable();
             $table->boolean('repeatable')->index();
-            $table->longText('map');
+            $table->longText('map')->nullable();
             $table->longText('listeners');
             $table->timestamps();
             $table->softDeletes();
@@ -26,7 +27,7 @@ class CreateRiverTables extends Migration
         Schema::create('river_versions', function (Blueprint $table) {
             $table->ulid('id')->primary();
             $table->foreignIdFor(River::class)->constrained()->cascadeOnDelete();
-            $table->boolean('is_autosave')->default(false);
+            $table->timestamp('published_at')->nullable();
             $table->longText('map');
             $table->timestamps();
         });

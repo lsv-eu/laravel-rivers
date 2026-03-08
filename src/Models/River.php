@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -17,6 +18,7 @@ use LsvEu\Rivers\Contracts\Raft;
 use LsvEu\Rivers\Events\RiverPausedEvent;
 use LsvEu\Rivers\Events\RiverResumedEvent;
 use LsvEu\Rivers\Exceptions\InvalidRiverMapException;
+use LsvEu\Rivers\Exceptions\InvalidRiverStatusException;
 
 /**
  * @property RiverMap $map
@@ -31,16 +33,64 @@ class River extends Model
     {
         parent::boot();
 
+        static::creating(function (River $river) {
+            $river->status ??= 'draft';
+        });
+
+        static::created(function (River $river) {
+            $version = $river->versions()->create([
+                'map' => $river->map,
+                'published_at' => $river->status !== 'draft' ? now() : null,
+            ]);
+
+            $changes = [
+                'working_version_id' => $version->id,
+            ];
+            if ($river->status !== 'draft') {
+                $changes['current_version_id'] = $version->id;
+            } else {
+                $changes['map'] = null;
+            }
+
+            $river->updateQuietly($changes);
+        });
+
         static::updating(function (River $river) {
             if ($river->isDirty('map')) {
-                $river->versions()->create([
-                    'map' => $river->map,
-                ]);
+                // If status is "draft"
+                if ($river->status === 'draft') {
+                    $river->workingVersion->update(['map' => $river->map]);
+                    unset($river->workingVersion);
+                    $river->map = $river->getOriginalWithoutRewindingModel('map');
+
+                    // If the versions do not match and the working version is published
+                } elseif (
+                    (
+                        $river->current_version_id !== $river->working_version_id ||
+                        $river->getOriginalWithoutRewindingModel('status') === 'draft'
+                    ) &&
+                    $river->workingVersion()->first()->published_at
+                ) {
+                    $river->current_version_id = $river->working_version_id;
+                    unset($river->currentVersion);
+
+                    // If the status is not "draft" and we aren't publishing
+                } else {
+                    if ($river->current_version_id === $river->working_version_id) {
+                        $version = $river->versions()->create(['map' => $river->map]);
+                        $river->working_version_id = $version->id;
+                    } else {
+                        $river->currentVersion->update(['map' => $river->map]);
+                        unset($river->currentVersion);
+                    }
+                    unset($river->workingVersion);
+                    $river->map = $river->getOriginalWithoutRewindingModel('map');
+                }
             }
         });
 
         static::saving(function (River $river) {
-            $river->listeners = $river->status == 'active' ? array_values($river->map->getListenerEvents()) : [];
+            $river->listeners = $river->status === 'active' ? array_values($river->map->getListenerEvents()) : [];
             $river->repeatable = $river->map->repeatable;
         });
 
@@ -63,6 +113,11 @@ class River extends Model
         ];
     }
 
+    public function currentVersion(): BelongsTo
+    {
+        return $this->belongsTo(RiverVersion::class, 'current_version_id');
+    }
+
     public function riverRuns(): HasMany
     {
         return $this->hasMany(RiverRun::class);
@@ -79,6 +134,11 @@ class River extends Model
     public function versions(): HasMany
     {
         return $this->hasMany(RiverVersion::class);
+    }
+
+    public function workingVersion(): BelongsTo
+    {
+        return $this->belongsTo(RiverVersion::class, 'working_version_id');
     }
 
     public function scopeActive(Builder $query): void
@@ -98,7 +158,27 @@ class River extends Model
 
     public function pause(): void
     {
+        if ($this->status !== 'active') {
+            throw new \Exception('Cannot pause river that is not paused');
+        }
+
         $this->status = 'paused';
+        $this->save();
+    }
+
+    public function publish(): void
+    {
+        if ($this->workingVersion->published_at) {
+            throw new \Exception('Cannot publish river that is already published');
+        }
+
+        $this->workingVersion->update(['published_at' => now()]);
+
+        if ($this->status === 'draft') {
+            $this->status = 'paused';
+        }
+
+        $this->map = $this->workingVersion()->first()->map;
         $this->save();
     }
 
@@ -122,12 +202,44 @@ class River extends Model
 
     protected function map(): Attribute
     {
-        return Attribute::set(function (RiverMap $map) {
-            if (! $map->isValid()) {
-                throw new InvalidRiverMapException;
+        return Attribute::make(
+            get: function (RiverMap|string|null $map): ?RiverMap {
+                if ($map === null) {
+                    return null;
+                }
+
+                if ($map instanceof RiverMap) {
+                    $map = json_encode($map);
+                }
+
+                return new RiverMap(json_decode($map, true));
+            },
+            set: function (?RiverMap $map) {
+                if (! $map) {
+                    return null;
+                }
+
+                if (! $map->isValid()) {
+                    throw new InvalidRiverMapException;
+                }
+
+                return $map->set($this, 'map', $map, []);
+            },
+        )->withoutObjectCaching();
+    }
+
+    protected function status(): Attribute
+    {
+        return Attribute::set(function (string $status) {
+            if (! in_array($status, ['active', 'paused', 'draft'])) {
+                throw new InvalidRiverStatusException;
             }
 
-            return $map->set($this, 'map', $map, []);
+            if ($status === 'draft' && $this->exists()) {
+                throw new InvalidRiverStatusException('Cannot set draft status on existing river');
+            }
+
+            return ['status' => $status];
         });
     }
 }

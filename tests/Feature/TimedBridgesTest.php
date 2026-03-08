@@ -19,7 +19,7 @@ it('should not queue listeners when disabled', function () {
     config()->set('rivers.use_timed_bridges', false);
     Queue::fake();
 
-    $river = River::create(['title' => 'Test River', 'map' => new BasicUserMap]);
+    $river = River::create(['title' => 'Test River', 'map' => new BasicUserMap, 'status' => 'active']);
     $river->pause();
     $river->resume();
 

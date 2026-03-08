@@ -71,6 +71,7 @@ function createRun(): array
     $river = River::create([
         'title' => 'Test',
         'map' => new RiverMap(['raftClass' => TestRaft::class]),
+        'status' => 'active',
     ]);
 
     $run = RiverRun::create([
