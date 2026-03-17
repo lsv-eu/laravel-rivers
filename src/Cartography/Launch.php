@@ -62,8 +62,7 @@ abstract class Launch extends RiverElement
 
     public function toArray(): array
     {
-        return [
-            'id' => $this->id,
+        return parent::toArray() + [
             'conditions' => $this->conditions->toArray(),
             'enabled' => $this->enabled,
             'raftClass' => $this->raftClass,
