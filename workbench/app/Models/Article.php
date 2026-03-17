@@ -19,7 +19,7 @@ class Article extends Model implements CreatesRaft
 {
     use HasFactory, RiverRunnable;
 
-    public function tags(): morphToMany
+    public function tags(): MorphToMany
     {
         return $this->morphToMany(Tag::class, 'taggable')->whereType('article');
     }

@@ -6,7 +6,7 @@
 return [
     'queue' => env('RIVERS_QUEUE', 'default'),
 
-    'job_class' => \LsvEu\Rivers\Jobs\ProcessRiverRun::class,
+    'job_class' => LsvEu\Rivers\Jobs\ProcessRiverRun::class,
 
     'use_timed_bridges' => env('RIVERS_USE_TIMED_BRIDGES', true),
 

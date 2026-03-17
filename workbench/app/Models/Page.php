@@ -12,7 +12,7 @@ class Page extends Model
 {
     use HasFactory;
 
-    public function tags(): morphToMany
+    public function tags(): MorphToMany
     {
         return $this->morphToMany(Tag::class, 'taggable')->using(Taggable::class)->whereType('page');
     }

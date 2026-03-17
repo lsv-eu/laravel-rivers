@@ -1,5 +1,5 @@
 <?php
 
 return [
-    \LsvEu\Rivers\RiversServiceProvider::class,
+    LsvEu\Rivers\RiversServiceProvider::class,
 ];
