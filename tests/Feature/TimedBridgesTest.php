@@ -73,12 +73,12 @@ it('should resume processing', function () {
     // ->and($river->riverRuns->first());
 
     $this->travelTo('2020-01-02 00:59:30');
-    $this->artisan('rivers:check_timed_bridges', ['--exact' => true]);
+    $this->artisan('rivers:check-timed-bridges', ['--exact' => true]);
     $river->refresh();
     expect($river->riverRuns->first()->status)->toBe('bridge');
 
     $this->travelTo('2020-01-02 01:00:30');
-    $this->artisan('rivers:check_timed_bridges', ['--exact' => true]);
+    $this->artisan('rivers:check-timed-bridges', ['--exact' => true]);
     $river->refresh();
     expect($river->riverRuns->first()->status)->toBe('paused')
         ->and($river->riverRuns->first()->location)->toBe('pause-rapid')
