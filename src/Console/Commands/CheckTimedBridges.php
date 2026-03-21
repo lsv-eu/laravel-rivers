@@ -9,7 +9,7 @@ use LsvEu\Rivers\Models\RiverTimedBridge;
 
 class CheckTimedBridges extends Command
 {
-    protected $signature = 'rivers:check_timed_bridges
+    protected $signature = 'rivers:check-timed-bridges
         {--d|dry-run : Just output the RiverRuns to resume}
         {--e|exact : Only check for the current minute}
         {--t|timestamp : Override time to use with unix timestamp}';
