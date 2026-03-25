@@ -79,11 +79,10 @@ class River extends Model
                     if ($river->current_version_id === $river->working_version_id) {
                         $version = $river->versions()->create(['map' => $river->map]);
                         $river->working_version_id = $version->id;
+                        unset($river->workingVersion);
                     } else {
-                        $river->currentVersion->update(['map' => $river->map]);
-                        unset($river->currentVersion);
+                        $river->workingVersion->update(['map' => $river->map]);
                     }
-                    unset($river->workingVersion);
                     $river->map = $river->getOriginalWithoutRewindingModel('map');
                 }
             }

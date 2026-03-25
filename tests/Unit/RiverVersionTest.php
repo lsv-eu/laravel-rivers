@@ -66,3 +66,38 @@ it('should create and update new version when active', function () {
     expect($river->map->toArray())->toBe($map->toArray());
     expect($river->workingVersion->map->toArray())->toBe($map2->toArray());
 });
+
+it('should update working version when when the working version is not published', function () {
+    $map = new TestRaftMap;
+    $river = River::create([
+        'title' => 'test',
+        'map' => $map,
+        'status' => 'active',
+    ]);
+
+    expect($river->versions()->count())->toBe(1);
+    expect($river->currentVersion)->toBeInstanceOf(RiverVersion::class);
+    expect($river->workingVersion)->toBeInstanceOf(RiverVersion::class);
+    expect($river->map->toArray())->toBe($map->toArray());
+
+    $map2 = $river->map;
+    $map2->forks->push(new Fork);
+    $river->map = $map2;
+    $river->save();
+
+    expect($river->versions()->count())->toBe(2);
+    expect($river->current_version_id)->not()->toBe($river->working_version_id);
+    expect($river->map->toArray())->toBe($map->toArray());
+    expect($river->workingVersion->map->toArray())->toBe($map2->toArray());
+
+    $map3 = $river->workingVersion->map;
+    $map3->forks->push(new Fork);
+    $river->map = $map3;
+    $river->save();
+
+    expect($river->versions()->count())->toBe(2);
+    expect($river->current_version_id)->not()->toBe($river->working_version_id);
+    expect($river->map->toArray())->toBe($map->toArray());
+    expect($river->workingVersion->map->toArray())->not->toBe($map2->toArray());
+    expect($river->workingVersion->map->toArray())->toBe($map3->toArray());
+});
