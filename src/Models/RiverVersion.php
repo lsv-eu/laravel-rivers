@@ -5,7 +5,7 @@ namespace LsvEu\Rivers\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use LsvEu\Rivers\Cartography\RiverMap;
+use LsvEu\Rivers\Casts\AsRiverMap;
 
 class RiverVersion extends Model
 {
@@ -16,7 +16,7 @@ class RiverVersion extends Model
     protected function casts(): array
     {
         return [
-            'map' => RiverMap::class,
+            'map' => AsRiverMap::class,
         ];
     }
 

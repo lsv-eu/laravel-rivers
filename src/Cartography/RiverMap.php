@@ -2,18 +2,14 @@
 
 namespace LsvEu\Rivers\Cartography;
 
-use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Support\Collection;
-use LsvEu\Rivers\Cartography\Traits\SerializesData;
 use LsvEu\Rivers\Contracts\Raft;
 use LsvEu\Rivers\Models\River;
 use LsvEu\Rivers\Models\RiverRun;
 
-class RiverMap implements \JsonSerializable, Arrayable, CastsAttributes
+class RiverMap implements \JsonSerializable, Arrayable
 {
-    use SerializesData;
-
     /**
      * @var RiverElementCollection<string, Bridge>
      */
@@ -117,6 +113,11 @@ class RiverMap implements \JsonSerializable, Arrayable, CastsAttributes
     public function isValid(): bool
     {
         return empty($this->validate());
+    }
+
+    public function jsonSerialize(): mixed
+    {
+        return $this->toArray();
     }
 
     public function toArray(): array

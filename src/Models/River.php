@@ -14,10 +14,10 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Event;
 use LsvEu\Rivers\Cartography\Launch;
 use LsvEu\Rivers\Cartography\RiverMap;
+use LsvEu\Rivers\Casts\AsRiverMap;
 use LsvEu\Rivers\Contracts\Raft;
 use LsvEu\Rivers\Events\RiverPausedEvent;
 use LsvEu\Rivers\Events\RiverResumedEvent;
-use LsvEu\Rivers\Exceptions\InvalidRiverMapException;
 use LsvEu\Rivers\Exceptions\InvalidRiverStatusException;
 
 /**
@@ -61,7 +61,7 @@ class River extends Model
                 if ($river->status === 'draft') {
                     $river->workingVersion->update(['map' => $river->map]);
                     unset($river->workingVersion);
-                    $river->map = $river->getOriginalWithoutRewindingModel('map');
+                    $river->map = $river->getOriginal('map');
 
                     // If the versions do not match and the working version is published
                 } elseif (
@@ -83,7 +83,7 @@ class River extends Model
                     } else {
                         $river->workingVersion->update(['map' => $river->map]);
                     }
-                    $river->map = $river->getOriginalWithoutRewindingModel('map');
+                    $river->map = $river->getOriginal('map');
                 }
             }
         });
@@ -108,7 +108,7 @@ class River extends Model
     {
         return [
             'listeners' => 'json',
-            'map' => RiverMap::class,
+            'map' => AsRiverMap::class,
         ];
     }
 
@@ -197,34 +197,6 @@ class River extends Model
 
             Config::get('rivers.job_class')::dispatch($run->id);
         }
-    }
-
-    protected function map(): Attribute
-    {
-        return Attribute::make(
-            get: function (RiverMap|string|null $map): ?RiverMap {
-                if ($map === null) {
-                    return null;
-                }
-
-                if ($map instanceof RiverMap) {
-                    $map = json_encode($map);
-                }
-
-                return new RiverMap(json_decode($map, true));
-            },
-            set: function (?RiverMap $map) {
-                if (! $map) {
-                    return null;
-                }
-
-                if (! $map->isValid()) {
-                    throw new InvalidRiverMapException;
-                }
-
-                return $map->set($this, 'map', $map, []);
-            },
-        )->withoutObjectCaching();
     }
 
     protected function status(): Attribute

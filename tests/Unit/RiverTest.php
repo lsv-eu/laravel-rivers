@@ -37,6 +37,18 @@ it('should throw an exception when assigning a draft status to active or paused'
     $river->update(['status' => 'draft']);
 })->throws(InvalidRiverStatusException::class);
 
+it('should return a new map copy when accessed', function () {
+    $river = River::create([
+        'title' => 'test',
+        'status' => 'paused',
+        'map' => new TestRaftMap,
+    ]);
+    $map1 = $river->map;
+    $map2 = $river->map;
+    expect($map1)->not->toBe($map2); // not some object
+    expect($map1->toArray())->toBe($map2->toArray()); // same content
+});
+
 it('should match versions when publishing from draft', function () {
     $map = new TestRaftMap;
     $river = River::create([
@@ -62,6 +74,7 @@ it('should match versions when publishing from draft', function () {
 
 it('should create new version when active', function () {
     $map = new TestRaftMap;
+    /** @var River $river */
     $river = River::create([
         'title' => 'test',
         'map' => $map,
@@ -78,9 +91,11 @@ it('should create new version when active', function () {
     $map2->forks->push(new Fork);
     $river->map = $map2;
     $river->save();
+    $river->refresh();
 
     expect($river->versions()->count())->toBe(2);
     expect($river->current_version_id)->not->toBe($river->working_version_id);
+    expect($river->currentVersion->map->toArray())->not->toBe($river->workingVersion->map->toArray());
     expect($river->map->toArray())->toBe($map->toArray());
     expect($river->workingVersion->map->toArray())->toBe($map2->toArray());
     expect($river->currentVersion->published_at)->not->toBeNull();

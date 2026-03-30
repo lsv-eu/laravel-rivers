@@ -20,6 +20,18 @@ it('should create version on creation', function () {
     expect($river->map)->toBeNull();
 });
 
+it('should return a copy of the map', function () {
+    $river = River::create([
+        'title' => 'test',
+        'map' => new TestRaftMap,
+    ]);
+
+    $map1 = $river->workingVersion->map;
+    $map2 = $river->workingVersion->map;
+    expect($map1)->not->toBe($map2); // not some object
+    expect($map1->toArray())->toBe($map2->toArray()); // same content
+});
+
 it('should not update current map when draft', function () {
     $map = new TestRaftMap;
     $river = River::create([
