@@ -39,7 +39,7 @@ class CreateRiverTables extends Migration
             $table->string('status')->default('created');
             $table->string('location')->nullable();
             $table->longText('raft');
-            $table->longText('sweeps')->default('[]');
+            $table->longText('sweeps')->nullable();
             $table->timestamps();
             $table->timestamp('completed_at')->nullable();
         });
