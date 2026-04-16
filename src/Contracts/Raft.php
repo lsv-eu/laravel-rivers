@@ -27,6 +27,15 @@ abstract class Raft
         throw new \Exception('Property does not exist. '.get_class($this)." does not have property, $name.");
     }
 
+    final public function __set(string $name, mixed $value): void
+    {
+        if (! $this->hasProperty($name)) {
+            throw new \Exception('Property does not exist. '.get_class($this)." does not have property, $name.");
+        }
+
+        $this->setProperty($name, $value);
+    }
+
     final public function deyhdrate(): string
     {
         return json_encode([
@@ -56,6 +65,20 @@ abstract class Raft
         }
 
         return $this->getRawProperty($name);
+    }
+
+    public function setProperty(string $name, mixed $value): void
+    {
+        if (! $this->hasProperty($name)) {
+            return;
+        }
+
+        $functionName = 'setProperty'.str($name)->camel();
+        if (method_exists($this, $functionName) && (new ReflectionMethod($this, $functionName))->isProtected()) {
+            $this->{$functionName}($value);
+        } else {
+            $this->{$name} = $value;
+        }
     }
 
     abstract protected function getRawProperty($key): mixed;

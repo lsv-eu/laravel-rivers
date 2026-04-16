@@ -12,6 +12,7 @@ class ProcessRiverElement
     public static function run(RiverRun $run, RiverElement $element, string $method = 'process', array $additionalData = []): void
     {
         (new static($run, $additionalData))->handle($element, $method);
+        $run->save();
     }
 
     public function handle(RiverElement $element, string $method = 'process'): void

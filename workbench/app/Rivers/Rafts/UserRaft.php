@@ -13,4 +13,10 @@ class UserRaft extends ModelRaft
         'name' => 'string',
         'email' => 'email',
     ];
+
+    public function getUser(): User
+    {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
+        return $this->record;
+    }
 }

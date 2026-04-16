@@ -32,7 +32,11 @@ class EvaluateRiverElement
         $dependencies = [];
 
         foreach ((new ReflectionMethod($element::class, $method))->getParameters() as $parameter) {
-            $dependencies[] = $this->injections[$parameter->name]() ?? $this->additionalData[$parameter->name] ?? null;
+            $dependencies[] = match (true) {
+                isset($this->injections[$parameter->name]) => $this->injections[$parameter->name](),
+                isset($this->additionalData[$parameter->name]) => $this->additionalData[$parameter->name],
+                default => null,
+            };
         }
 
         return $element->$method(...$dependencies);

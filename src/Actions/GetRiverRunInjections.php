@@ -34,7 +34,7 @@ class GetRiverRunInjections
                 value: fn () => $this->run->sweeps->map(fn ($sweep) => fn () => $sweep),
                 default: [],
             ),
-            ...collect($this->raft->getInjectionNames())
+            ...collect($this->raft?->getInjectionNames() ?? [])
                 ->mapWithKeys(fn ($name) => [$name => fn () => $this->raft->resolveProvidedInjection($name)])
                 ->toArray(),
             'map' => fn () => $this->river->map,
