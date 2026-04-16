@@ -59,3 +59,25 @@ test('evaluate should run without a raft', function () {
     EvaluateRiverElement::run($river, $ripple, 'process', ['other' => (object) ['message' => 'test message']]);
     expect($ripple->output)->toBe('test message');
 });
+
+test('evaluate should provide a $get function', function () {
+    $river = River::create([
+        'title' => 'Queue Test',
+        'status' => 'active',
+        'map' => new BasicUserMap,
+    ]);
+
+    $ripple = new class extends Cartography\Ripple
+    {
+        public string $output;
+
+        public function process(?UserRaft $raft = null, ?callable $get = null): void
+        {
+            $other = $get('other');
+            $this->output = $other->message;
+        }
+    };
+
+    EvaluateRiverElement::run($river, $ripple, 'process', ['other' => (object) ['message' => 'test message']]);
+    expect($ripple->output)->toBe('test message');
+});
