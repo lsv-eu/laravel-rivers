@@ -37,6 +37,19 @@ it('should throw an exception when assigning a draft status to active or paused'
     $river->update(['status' => 'draft']);
 })->throws(InvalidRiverStatusException::class);
 
+it('should not throw an exception when assigning draft status to a new river', function () {
+    River::create([
+        'title' => 'test',
+        'status' => 'draft',
+        'map' => new TestRaftMap,
+    ]);
+    $river = River::create([
+        'title' => 'test2',
+        'status' => 'draft',
+        'map' => new TestRaftMap,
+    ]);
+})->throwsNoExceptions();
+
 it('should return a new map copy when accessed', function () {
     $river = River::create([
         'title' => 'test',

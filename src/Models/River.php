@@ -206,7 +206,7 @@ class River extends Model
                 throw new InvalidRiverStatusException;
             }
 
-            if ($status === 'draft' && $this->exists()) {
+            if ($status === 'draft' && $this->exists) {
                 throw new InvalidRiverStatusException('Cannot set draft status on existing river');
             }
 
