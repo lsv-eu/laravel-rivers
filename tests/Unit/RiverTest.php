@@ -4,6 +4,7 @@ namespace Tests\Unit;
 
 use LsvEu\Rivers\Cartography\Connection;
 use LsvEu\Rivers\Cartography\Fork;
+use LsvEu\Rivers\Cartography\Rapid;
 use LsvEu\Rivers\Exceptions\InvalidRiverMapException;
 use LsvEu\Rivers\Exceptions\InvalidRiverStatusException;
 use LsvEu\Rivers\Models\River;
@@ -158,4 +159,25 @@ it('should create new version when paused', function () {
     expect($river->currentVersion->map->toArray())->toBe($map2->toArray());
     expect($river->currentVersion->published_at)->not->toBeNull();
     expect($river->workingVersion->published_at)->not->toBeNull();
+});
+
+it('should allow saving a version that matches the published map', function () {
+    $map = new TestRaftMap;
+    $river = River::create([
+        'title' => 'test',
+        'map' => $map,
+        'status' => 'paused',
+    ]);
+    expect($river->versions()->count())->toBe(1);
+
+    $map->rapids->push(new Rapid);
+    $river->update(['map' => $map]);
+    expect($river->versions()->count())->toBe(2);
+    expect($river->map->rapids->count())->toBe(0);
+    expect($river->workingVersion->map->rapids->count())->toBe(1);
+
+    $map->rapids->pop();
+    $river->update(['map' => $map]);
+    expect($river->map->rapids->count())->toBe(0);
+    expect($river->workingVersion->map->rapids->count())->toBe(0);
 });

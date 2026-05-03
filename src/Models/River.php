@@ -34,6 +34,8 @@ class River extends Model
         parent::boot();
 
         static::creating(function (River $river) {
+            $river->listeners ??= [];
+            $river->repeatable ??= $river->map->repeatable;
             $river->status ??= 'draft';
         });
 
@@ -53,10 +55,14 @@ class River extends Model
             }
 
             $river->updateQuietly($changes);
+            unset($river->workingVersion);
         });
 
-        static::updating(function (River $river) {
-            if ($river->isDirty('map')) {
+        static::saving(function (River $river) {
+            if (
+                $river->getKey() &&
+                ($river->isDirty('map') || $river->map->toArray() !== $river->workingVersion?->map->toArray())
+            ) {
                 // If status is "draft"
                 if ($river->status === 'draft') {
                     $river->workingVersion->update(['map' => $river->map]);
@@ -88,9 +94,11 @@ class River extends Model
             }
         });
 
-        static::saving(function (River $river) {
-            $river->listeners = $river->status === 'active' ? array_values($river->map->getListenerEvents()) : [];
-            $river->repeatable = $river->map->repeatable;
+        static::saved(function (River $river) {
+            $river->updateQuietly([
+                'listeners' => $river->map && $river->status === 'active' ? array_values($river->map->getListenerEvents()) : [],
+                'repeatable' => $river->map?->repeatable ?? $river->repeatable,
+            ]);
         });
 
         static::updated(function (River $river) {
