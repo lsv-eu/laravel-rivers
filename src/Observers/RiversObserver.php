@@ -19,7 +19,7 @@ class RiversObserver
     public function deleted(CreatesRaft|Model $model): void
     {
         if ($raft = $model->createRaft()) {
-            Rivers::trigger($this->createListener($model, 'created'), $raft);
+            Rivers::trigger($this->createListener($model, 'deleted'), $raft);
         }
     }
 
