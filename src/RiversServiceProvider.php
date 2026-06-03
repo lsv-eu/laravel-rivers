@@ -2,9 +2,10 @@
 
 namespace LsvEu\Rivers;
 
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Event;
-use Illuminate\Support\Facades\Schedule;
 use Illuminate\Support\ServiceProvider;
+use InvalidArgumentException;
 use LsvEu\Rivers\Livewire\Synthesizers\MapSynthesizer;
 
 class RiversServiceProvider extends ServiceProvider
@@ -12,7 +13,7 @@ class RiversServiceProvider extends ServiceProvider
     /**
      * Bootstrap the application services.
      */
-    public function boot()
+    public function boot(): void
     {
         /*
          * Optional methods to load your package assets
@@ -48,9 +49,7 @@ class RiversServiceProvider extends ServiceProvider
             ], 'lang');*/
 
             // Registering schedules
-            if (config('rivers.use_timed_bridges')) {
-                Schedule::command('rivers:check-timed-bridges')->everyMinute();
-            }
+            $this->bootSchedule();
         }
 
         // Register event listeners
@@ -58,6 +57,8 @@ class RiversServiceProvider extends ServiceProvider
         Event::listen(Events\RiverResumedEvent::class, Listeners\ResumeRiverTimedBridges::class);
 
         if (class_exists('\\Livewire\\Livewire')) {
+            /** @noinspection PhpUndefinedNamespaceInspection */
+            /** @noinspection PhpUndefinedClassInspection */
             \Livewire\Livewire::propertySynthesizer(MapSynthesizer::class);
         }
     }
@@ -65,7 +66,7 @@ class RiversServiceProvider extends ServiceProvider
     /**
      * Register the application services.
      */
-    public function register()
+    public function register(): void
     {
         // Automatically apply the package configuration
         $this->mergeConfigFrom(__DIR__.'/../config/config.php', 'rivers');
@@ -74,5 +75,24 @@ class RiversServiceProvider extends ServiceProvider
         $this->app->singleton('rivers', function () {
             return new Rivers;
         });
+    }
+
+    public function bootSchedule(): void
+    {
+        if (config('rivers.timed_bridges.enabled')) {
+            if (($seconds = (int) config('rivers.timed_bridges.seconds')) > 0 && $seconds < 60) {
+                if (60 % $seconds !== 0) {
+                    throw new InvalidArgumentException("The seconds [$seconds] are not evenly divisible by 60.");
+                }
+                $schedule = app(Schedule::class)->command(config('rivers.timed_bridges.command'));
+                if ($seconds > 1) {
+                    $schedule->repeatSeconds = $seconds;
+                }
+                $schedule->everyMinute();
+            } elseif (($expression = config('rivers.timed_bridges.cron')) !== null) {
+                $schedule = app(Schedule::class)->command(config('rivers.timed_bridges.command'));
+                $schedule->cron($expression);
+            }
+        }
     }
 }

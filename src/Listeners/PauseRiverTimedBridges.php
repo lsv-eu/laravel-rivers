@@ -14,6 +14,6 @@ class PauseRiverTimedBridges implements ShouldQueue
 
     public function shouldQueue(): bool
     {
-        return (bool) config('rivers.use_timed_bridges');
+        return (bool) config('rivers.timed_bridges.enabled');
     }
 }

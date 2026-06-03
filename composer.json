@@ -20,10 +20,11 @@
         "illuminate/support": "^11.23.5|^12.0"
     },
     "require-dev": {
+        "laradumps/laradumps": "^5.0",
         "laravel/pint": "^1.18",
         "orchestra/testbench": "^9.5",
         "pestphp/pest": "^3.5",
-        "laradumps/laradumps": "^5.0"
+        "spatie/pest-plugin-test-time": "^2.2"
     },
     "autoload": {
         "files": [
