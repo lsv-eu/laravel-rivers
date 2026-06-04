@@ -37,7 +37,9 @@ class RiverTimedBridge extends Model
     protected function resumeAt(): Attribute
     {
         return Attribute::set(fn (\DateTime $value) => [
-            'resume_at' => $value->setTime($value->format('H'), $value->format('i')),
+            'resume_at' => (int) config('rivers.timed_bridges.seconds') ?
+                $value :
+                $value->setTime($value->format('H'), $value->format('i')),
         ]);
     }
 }

@@ -84,13 +84,13 @@ class RiversServiceProvider extends ServiceProvider
                 if (60 % $seconds !== 0) {
                     throw new InvalidArgumentException("The seconds [$seconds] are not evenly divisible by 60.");
                 }
-                $schedule = app(Schedule::class)->command(config('rivers.timed_bridges.command'));
+                $schedule = app(Schedule::class)->command(config('rivers.timed_bridges.command'), ['--dispatch']);
                 if ($seconds > 1) {
                     $schedule->repeatSeconds = $seconds;
                 }
                 $schedule->everyMinute();
             } elseif (($expression = config('rivers.timed_bridges.cron')) !== null) {
-                $schedule = app(Schedule::class)->command(config('rivers.timed_bridges.command'));
+                $schedule = app(Schedule::class)->command(config('rivers.timed_bridges.command'), ['--dispatch']);
                 $schedule->cron($expression);
             }
         }
