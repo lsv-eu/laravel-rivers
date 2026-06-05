@@ -85,7 +85,7 @@ class RiversServiceProvider extends ServiceProvider
                     throw new InvalidArgumentException("The seconds [$seconds] are not evenly divisible by 60.");
                 }
                 $schedule = app(Schedule::class)->command(config('rivers.timed_bridges.command'), ['--dispatch']);
-                if ($seconds > 1) {
+                if ($seconds > 0) {
                     $schedule->repeatSeconds = $seconds;
                 }
                 $schedule->everyMinute();
