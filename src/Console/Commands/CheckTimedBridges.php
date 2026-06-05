@@ -38,11 +38,11 @@ class CheckTimedBridges extends Command
 
         $results = (new ProcessTimeBridgesCheck($time))->handle($this->option('exact'), $this->option('dry-run'));
 
-        $count = is_array($results) ? count($results) : $results;
+        $count = $results['count'];
         $this->info('Resuming '.$count.' RiverRuns');
 
-        if (is_array($results)) {
-            $this->table(['ID'], $results);
+        if (isset($results['table'])) {
+            $this->table(['ID'], $results['table']);
         }
 
         return 0;

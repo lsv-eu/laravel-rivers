@@ -37,7 +37,7 @@ class ProcessTimeBridgesCheck implements ShouldQueue
 
         if ($count) {
             if ($dryRun) {
-                return $bridgeQuery->pluck('id')->all();
+                return ['count' => $count, 'table' => $bridgeQuery->pluck('id')->all()];
             } else {
                 $bridgeQuery->each(function (RiverTimedBridge $bridge) {
                     $bridge->resume();
@@ -45,7 +45,7 @@ class ProcessTimeBridgesCheck implements ShouldQueue
             }
         }
 
-        return $count;
+        return ['count' => $count];
     }
 
     public function tries(): int
