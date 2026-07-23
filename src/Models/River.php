@@ -61,14 +61,15 @@ class River extends Model
         static::saving(function (River $river) {
             if (
                 $river->getKey() &&
-                ($river->isDirty('map') || $river->map->toArray() !== $river->workingVersion?->map->toArray())
+                ($river->isDirty('map') || $river->map?->toArray() !== $river->workingVersion?->map->toArray())
             ) {
                 // If status is "draft"
                 if ($river->status === 'draft') {
-                    $river->workingVersion->update(['map' => $river->map]);
-                    unset($river->workingVersion);
-                    $river->map = $river->getOriginal('map');
-
+                    if ($river->map) {
+                        $river->workingVersion->update(['map' => $river->map]);
+                        unset($river->workingVersion);
+                        $river->map = $river->getOriginal('map');
+                    }
                     // If the versions do not match and the working version is published
                 } elseif (
                     (

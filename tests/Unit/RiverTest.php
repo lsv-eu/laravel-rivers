@@ -181,3 +181,18 @@ it('should allow saving a version that matches the published map', function () {
     expect($river->map->rapids->count())->toBe(0);
     expect($river->workingVersion->map->rapids->count())->toBe(0);
 });
+
+it('should update the title when in draft status', function () {
+    $river = River::create([
+        'title' => 'test',
+        'map' => new TestRaftMap,
+    ]);
+
+    expect($river->title)->toBe('test')
+        ->and($river->map)->toBeNull();
+
+    $river->title = 'new title';
+    $river->save();
+
+    expect($river->title)->toBe('new title');
+});
