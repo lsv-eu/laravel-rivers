@@ -20,7 +20,7 @@ class Rapid extends RiverElement implements CanBeProcessed
         parent::__construct($attributes);
 
         $this->label = $attributes['label'] ?? $this->label ?: $this->label;
-        $this->ripples = RiverElementCollection::make($attributes['ripples'] ?? []);
+        $this->ripples = RiverElementCollection::fromRiverElements($attributes['ripples'] ?? []);
     }
 
     public function getAllRiverElements(): array

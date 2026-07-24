@@ -22,13 +22,13 @@ test('serialization results match', function () {
 });
 
 test('unserialization fails for non-existent classes', function () {
-    expect(fn () => LsvEu\Rivers\Cartography\RiverElementCollection::make([
+    expect(fn () => LsvEu\Rivers\Cartography\RiverElementCollection::fromRiverElements([
         ['NonExistentClass', ['id' => 'foo']],
     ]))->toThrow(Exception::class, 'Class NonExistentClass not found');
 });
 
 test('unserialization fails for classes not extending RiverElement', function () {
-    expect(fn () => LsvEu\Rivers\Cartography\RiverElementCollection::make([
+    expect(fn () => LsvEu\Rivers\Cartography\RiverElementCollection::fromRiverElements([
         [Tests\Unit\Classes\BadRiverElement::class, ['id' => 'foo']],
     ]))->toThrow(
         Exception::class,
@@ -37,7 +37,7 @@ test('unserialization fails for classes not extending RiverElement', function ()
 });
 
 test('unserialization passes for good classes', function () {
-    $collection = LsvEu\Rivers\Cartography\RiverElementCollection::make([
+    $collection = LsvEu\Rivers\Cartography\RiverElementCollection::fromRiverElements([
         [Tests\Unit\Classes\GoodRiverElement::class, ['id' => 'foo']],
     ]);
 

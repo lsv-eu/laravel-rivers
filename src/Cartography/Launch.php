@@ -25,7 +25,7 @@ abstract class Launch extends RiverElement
     {
         parent::__construct($attributes);
 
-        $this->conditions = RiverElementCollection::make($attributes['conditions'] ?? []);
+        $this->conditions = RiverElementCollection::fromRiverElements($attributes['conditions'] ?? []);
 
         $this->enabled = $attributes['enabled'] ?? false;
 

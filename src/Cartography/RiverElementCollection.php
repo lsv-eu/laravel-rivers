@@ -34,7 +34,7 @@ class RiverElementCollection extends Collection
     }
 
     /**
-     * Create a new collection instance if the value isn't one already.
+     * Create a typed collection of river elements.
      *
      * @template T of RiverElement
      *
@@ -42,7 +42,7 @@ class RiverElementCollection extends Collection
      * @param  class-string<T>  $class
      * @return static<TKey, T>
      */
-    public static function make($items = [], string $class = RiverElement::class): static
+    public static function fromRiverElements($items = [], string $class = RiverElement::class): static
     {
         return (new static($items))
             ->mapWithKeys(function ($item) use ($class) {
@@ -71,5 +71,13 @@ class RiverElementCollection extends Collection
 
                 return [$newItem->id => $newItem];
             });
+    }
+
+    /**
+     * @deprecated Use fromRiverElements() so the element class stays strongly typed.
+     */
+    public static function make($items = [], ...$args): static
+    {
+        return static::fromRiverElements($items, $args[0] ?? RiverElement::class);
     }
 }

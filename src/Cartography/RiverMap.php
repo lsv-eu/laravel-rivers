@@ -41,11 +41,11 @@ class RiverMap implements \JsonSerializable, Arrayable
 
     public function __construct(array $attributes = [])
     {
-        $this->bridges = RiverElementCollection::make($attributes['bridges'] ?? [], Bridge::class);
-        $this->connections = RiverElementCollection::make($attributes['connections'] ?? [], Connection::class);
-        $this->forks = RiverElementCollection::make($attributes['forks'] ?? [], Fork::class);
-        $this->rapids = RiverElementCollection::make($attributes['rapids'] ?? [], Rapid::class);
-        $this->launches = RiverElementCollection::make($attributes['launches'] ?? [], Launch::class);
+        $this->bridges = RiverElementCollection::fromRiverElements($attributes['bridges'] ?? [], Bridge::class);
+        $this->connections = RiverElementCollection::fromRiverElements($attributes['connections'] ?? [], Connection::class);
+        $this->forks = RiverElementCollection::fromRiverElements($attributes['forks'] ?? [], Fork::class);
+        $this->rapids = RiverElementCollection::fromRiverElements($attributes['rapids'] ?? [], Rapid::class);
+        $this->launches = RiverElementCollection::fromRiverElements($attributes['launches'] ?? [], Launch::class);
 
         $this->raftClass = $attributes['raftClass'] ?? null;
         $this->repeatable = $attributes['repeatable'] ?? false;

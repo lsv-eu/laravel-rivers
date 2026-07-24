@@ -16,7 +16,7 @@ class Fork extends RiverElement
     {
         parent::__construct($attributes);
 
-        $this->conditions = RiverElementCollection::make($attributes['conditions'] ?? []);
+        $this->conditions = RiverElementCollection::fromRiverElements($attributes['conditions'] ?? []);
     }
 
     public function getAllRiverElements(): array
