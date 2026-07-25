@@ -5,6 +5,7 @@ namespace LsvEu\Rivers\Cartography;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Support\Traits\Macroable;
 use LsvEu\Rivers\Attributes\StoreProperty;
+use LsvEu\Rivers\Cartography\Concerns\HasRiverElementAttributes;
 use LsvEu\Rivers\Exceptions\PropertyNotDefinedException;
 use ReflectionClass;
 use ReflectionProperty;
@@ -32,7 +33,7 @@ abstract class RiverElement implements Arrayable
     public function __construct(array $attributes = [])
     {
         $reflector = new ReflectionClass($this);
-        $this->_traits = $reflector->getTraits();
+        $this->_traits = $this->getAllTraits($this);
         $this->_propertiesWithAttributes = array_filter(
             $reflector->getProperties(),
             fn (ReflectionProperty $property) => $property->getAttributes(StoreProperty::class) !== [],
@@ -91,5 +92,22 @@ abstract class RiverElement implements Arrayable
         return [
             'Bad Object',
         ];
+    }
+
+    private function getAllTraits($class): array
+    {
+        $traits = [];
+        do {
+            $list = class_uses($class);
+            if (is_array($list)) {
+                foreach ($list as $trait) {
+                    if (isset(class_uses($trait)[HasRiverElementAttributes::class])) {
+                        $traits[$trait] = new ReflectionClass($trait);
+                    }
+                }
+            }
+        } while ($class = get_parent_class($class));
+
+        return array_unique($traits);
     }
 }

@@ -5,6 +5,7 @@ namespace Tests\Unit;
 use LsvEu\Rivers\Attributes\StoreProperty;
 use LsvEu\Rivers\Cartography\RiverElement;
 use LsvEu\Rivers\Exceptions\PropertyNotDefinedException;
+use Tests\Unit\Classes\HasTestAttribute;
 
 it('should set the property to the default value if not provided', function () {
     $test = new class extends RiverElement
@@ -50,33 +51,21 @@ it('should add the property to the toArray method', function () {
 });
 
 it('should add the property to the toArray method if defined in trait', function () {
-    trait HasTest
-    {
-        #[StoreProperty]
-        public bool $test;
-    }
-
     $test = new class(['test' => true]) extends RiverElement
     {
-        use HasTest;
+        use HasTestAttribute;
     };
 
     expect($test->toArray())->toHaveKey('test', true);
 });
 
 it('should work if added to a parent class', function () {
-    trait HasTest
+    class SPATTestClass extends RiverElement
     {
-        #[StoreProperty]
-        public bool $test;
+        use HasTestAttribute;
     }
 
-    class TestClass extends RiverElement
-    {
-        use HasTest;
-    };
-
-    $test = new class(['test' => true]) extends TestClass {};
+    $test = new class(['test' => true]) extends SPATTestClass {};
 
     expect($test->toArray())->toHaveKey('test', true);
 });
