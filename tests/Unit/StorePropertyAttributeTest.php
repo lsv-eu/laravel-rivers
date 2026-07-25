@@ -63,3 +63,20 @@ it('should add the property to the toArray method if defined in trait', function
 
     expect($test->toArray())->toHaveKey('test', true);
 });
+
+it('should work if added to a parent class', function () {
+    trait HasTest
+    {
+        #[StoreProperty]
+        public bool $test;
+    }
+
+    class TestClass extends RiverElement
+    {
+        use HasTest;
+    };
+
+    $test = new class(['test' => true]) extends TestClass {};
+
+    expect($test->toArray())->toHaveKey('test', true);
+});
