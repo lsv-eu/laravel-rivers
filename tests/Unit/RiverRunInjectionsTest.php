@@ -6,6 +6,7 @@ use LsvEu\Rivers\Actions\GetRiverRunInjections;
 use LsvEu\Rivers\Cartography\RiverMap;
 use LsvEu\Rivers\Models\River;
 use LsvEu\Rivers\Models\RiverRun;
+use Tests\Unit\Classes\AdditionalInjections;
 use Tests\Unit\Classes\TestRaft;
 use Workbench\App\Models\Article;
 use Workbench\App\Rivers\Rafts\ArticleRaft;
@@ -44,7 +45,7 @@ it('should not provide sweeps', function () {
         ->and($injections)->not()->toHaveKey('mother');
 });
 
-it('should not provide additional rafts as defined by main raft', function () {
+it('should provide additional rafts as defined by main raft', function () {
     $river = River::create([
         'title' => 'Test',
         'map' => new RiverMap(['raftClass' => ArticleRaft::class]),
@@ -64,6 +65,30 @@ it('should not provide additional rafts as defined by main raft', function () {
         ->and($injections['article']()->title)->toBe($article->title)
         ->and($injections)->toHaveKey('author')
         ->and($injections['author']()->name)->toBe($article->user->name);
+});
+
+it('should add additional injections if configured', function () {
+    $river = River::create([
+        'title' => 'Test',
+        'map' => new RiverMap(['raftClass' => ArticleRaft::class]),
+    ]);
+
+    $article = Article::factory()->create();
+
+    $run = RiverRun::create([
+        'river_id' => $river->id,
+        'raft' => new ArticleRaft(['modelId' => $article->id]),
+    ]);
+
+    expect(GetRiverRunInjections::run(RiverRun::find($run->id)))
+        ->toHaveCount(7)
+        ->not()->toHaveKey('book');
+
+    config(['rivers.additional_injections_class' => AdditionalInjections::class]);
+
+    expect(GetRiverRunInjections::run(RiverRun::find($run->id)))
+        ->toHaveCount(8)
+        ->toHaveKey('book');
 });
 
 function createRun(): array

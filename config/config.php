@@ -8,6 +8,13 @@ return [
 
     'job_class' => LsvEu\Rivers\Jobs\ProcessRiverRun::class,
 
+    /**
+     * The class that provides additional (global) injections.
+     * This class must implement \LsvEu\Rivers\Contracts\ProvidesInjections.
+     * Set to null to disable.
+     */
+    'additional_injections_class' => null,
+
     'timed_bridges' => [
         'enabled' => env('RIVERS_TIMED_BRIDGES_ENABLED', true),
 

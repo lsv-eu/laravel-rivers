@@ -28,6 +28,11 @@ class GetRiverRunInjections
 
     public function handle(bool $withSweeps = true): array
     {
+        $additional = [];
+        if (config('rivers.additional_injections_class')) {
+            $additional = config('rivers.additional_injections_class')::getInjections($this->river, $this->raft);
+        }
+
         return [
             ...when(
                 condition: $this->run && $withSweeps,
@@ -42,6 +47,7 @@ class GetRiverRunInjections
             'river' => fn () => $this->river,
             'riverRun' => fn () => $this->run,
             'run' => fn () => $this->run,
+            ...$additional,
         ];
     }
 
