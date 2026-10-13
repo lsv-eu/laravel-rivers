@@ -5,7 +5,6 @@ namespace LsvEu\Rivers\Console\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Queue;
-use LsvEu\Rivers\Jobs\ProcessTimeBridgesCheck;
 
 class CheckTimedBridges extends Command
 {
@@ -20,6 +19,8 @@ class CheckTimedBridges extends Command
     public function handle(): int
     {
         $time = Carbon::createFromTimestamp($this->option('timestamp') ?: now()->timestamp);
+        $bridgeCheckClass = config('rivers.timed_bridges.class');
+
         if (! (int) config('rivers.timed_bridges.seconds')) {
             $time->seconds(0);
         }
@@ -30,13 +31,13 @@ class CheckTimedBridges extends Command
         }
 
         if ($this->option('dispatch')) {
-            Queue::push(new ProcessTimeBridgesCheck($time));
+            Queue::push(new $bridgeCheckClass($time));
             $this->info('Dispatched job');
 
             return 0;
         }
 
-        $results = (new ProcessTimeBridgesCheck($time))->handle($this->option('exact'), $this->option('dry-run'));
+        $results = (new $bridgeCheckClass($time))->handle($this->option('exact'), $this->option('dry-run'));
 
         $count = $results['count'];
         $this->info('Resuming '.$count.' RiverRuns');

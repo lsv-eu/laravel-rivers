@@ -20,6 +20,8 @@ return [
 
         'command' => env('RIVERS_TIMED_BRIDGES_COMMAND', 'rivers:check-timed-bridges'),
 
+        'class' => env('RIVERS_TIMED_BRIDGES_CLASS', LsvEu\Rivers\Jobs\ProcessTimeBridgesCheck::class),
+
         /**
          * The cron expression for timed bridges.
          * If seconds is a positive integer, this will be ignored.
